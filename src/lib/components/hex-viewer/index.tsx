@@ -171,7 +171,7 @@ export function HexViewer({ data, fileName }: HexViewerProps) {
 
         <ContextMenu.Portal>
           <ContextMenu.Positioner side="bottom" align="start">
-            <ContextMenu.Popup className="rounded-md bg-popover py-1 shadow-lg border border-border min-w-45">
+            <ContextMenu.Popup className="rounded-md text-foreground bg-popover py-1 shadow-lg border border-border min-w-45">
               <ContextMenu.Item
                 onClick={copyOffset}
                 className="px-4 py-2 text-sm hover:bg-accent rounded-sm mx-1"
@@ -224,7 +224,7 @@ const HexRow = ({
       }}
       className="flex gap-4 px-4 font-mono text-xs hover:bg-accent/30"
     >
-      <div className="w-20 text-muted-foreground flex items-center">
+      <div className="w-20 text-muted-foreground flex items-center select-none">
         {offset.toString(16).padStart(8, "0").toUpperCase()}
       </div>
 
@@ -248,8 +248,18 @@ const HexRow = ({
           return (
             <span
               key={i}
-              onMouseDown={() => onByteMouseDown(globalIndex)}
-              onMouseEnter={() => onByteMouseEnter(globalIndex)}
+              onMouseDown={(e) => {
+                if (e.button === 0) {
+                  e.preventDefault();
+                  onByteMouseDown(globalIndex);
+                }
+              }}
+              onMouseEnter={(e) => {
+                if (e.button === 0) {
+                  e.preventDefault();
+                  onByteMouseEnter(globalIndex);
+                }
+              }}
               className={`w-6 text-center cursor-pointer select-none ${
                 selected
                   ? "bg-primary text-primary-foreground"
