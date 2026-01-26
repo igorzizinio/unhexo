@@ -22,7 +22,7 @@ const Titlebar = () => {
 
 	const openFile = async () => {
 		const selected = await open({
-			multiple: false,
+			multiple: true,
 			filters: [
 				{
 					name: "All Files",
@@ -33,9 +33,11 @@ const Titlebar = () => {
 
 		if (selected) {
 			try {
-				const data = await readFile(selected);
-				const fileName = selected.split(/[\\/]/).pop() || "Unknown";
-				addFile(selected, fileName, new Uint8Array(data));
+				for (const filePath of selected) {
+					const data = await readFile(filePath);
+					const fileName = filePath.split(/[\\/]/).pop() || "Unknown";
+					addFile(filePath, fileName, new Uint8Array(data));
+				}
 			} catch (error) {
 				console.error("Failed to read file:", error);
 			}

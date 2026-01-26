@@ -1,4 +1,5 @@
 import { HexViewer } from "./lib/components/hex-viewer";
+import StatusBar from "./lib/components/status-bar";
 import { Tabs } from "./lib/components/tabs";
 import Titlebar from "./lib/components/titlebar";
 import { FileProvider, useFiles } from "./lib/context/FileContext";
@@ -23,6 +24,7 @@ function AppContent() {
 					fileName={activeTab?.fileName}
 				/>
 			</main>
+			<StatusBar />
 		</div>
 	);
 }

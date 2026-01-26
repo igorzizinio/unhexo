@@ -1,6 +1,7 @@
 import { ContextMenu } from "@base-ui/react/context-menu";
 import type { TargetedUIEvent } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import StatusBar from "../status-bar";
 
 interface HexViewerProps {
 	data: Uint8Array | null;
@@ -11,7 +12,7 @@ const ROW_HEIGHT = 24;
 const BYTES_PER_ROW = 16;
 const OVERSCAN = 15; // Linhas extras para renderizar acima e abaixo
 
-export function HexViewer({ data, fileName }: HexViewerProps) {
+export function HexViewer({ data, fileName }: Readonly<HexViewerProps>) {
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	const [scrollTop, setScrollTop] = useState(0);
@@ -117,17 +118,19 @@ export function HexViewer({ data, fileName }: HexViewerProps) {
 		navigator.clipboard.writeText(hex);
 	};
 
+	const copySelectionAscii = () => {
+		if (selectionStart === null || selectionEnd === null) return;
+
+		const start = Math.min(selectionStart, selectionEnd);
+		const end = Math.max(selectionStart, selectionEnd);
+		const ascii = Array.from(data.slice(start, end + 1))
+			.map((b) => (b >= 32 && b <= 126 ? String.fromCodePoint(b) : "."))
+			.join("");
+		navigator.clipboard.writeText(ascii);
+	};
+
 	return (
 		<div className="h-full flex flex-col bg-background">
-			{fileName && (
-				<div className="px-4 py-2 border-b border-border bg-muted/50 shrink-0">
-					<p className="text-sm font-medium">{fileName}</p>
-					<p className="text-xs text-muted-foreground">
-						{data.length.toLocaleString()} bytes
-					</p>
-				</div>
-			)}
-
 			<div className="bg-muted border-b border-border px-4 py-2 flex gap-4 font-mono text-xs shrink-0">
 				<div className="w-20">Offset</div>
 				<div className="flex ">
@@ -180,12 +183,21 @@ export function HexViewer({ data, fileName }: HexViewerProps) {
 							</ContextMenu.Item>
 
 							{selectionStart !== selectionEnd && (
-								<ContextMenu.Item
-									onClick={copySelectionHex}
-									className="px-4 py-2 text-sm hover:bg-accent rounded-sm mx-1"
-								>
-									Copy as Hex
-								</ContextMenu.Item>
+								<>
+									<ContextMenu.Item
+										onClick={copySelectionHex}
+										className="px-4 py-2 text-sm hover:bg-accent rounded-sm mx-1"
+									>
+										Copy as Hex
+									</ContextMenu.Item>
+
+									<ContextMenu.Item
+										onClick={copySelectionAscii}
+										className="px-4 py-2 text-sm hover:bg-accent rounded-sm mx-1"
+									>
+										Copy as ASCII
+									</ContextMenu.Item>
+								</>
 							)}
 						</ContextMenu.Popup>
 					</ContextMenu.Positioner>
@@ -267,8 +279,8 @@ const HexRow = ({
 									onByteMouseDown(globalIndex);
 								}
 							}}
-							className={`w-6 h-6 flex items-center justify-center text-center cursor-pointer select-none
-                ${selected ? "bg-primary text-primary-foreground" : "hover:bg-accent"}
+							className={`w-6 h-6 flex text-sm items-center justify-center text-center cursor-pointer select-none 
+                ${selected ? "bg-primary text-primary-foreground" : "hover:bg-accent even:text-muted-foreground"}
               `}
 						>
 							{byte.toString(16).padStart(2, "0").toUpperCase()}
@@ -287,7 +299,7 @@ const HexRow = ({
 					const byte = data[globalIndex];
 					const selected = isByteSelected(globalIndex);
 					const char =
-						byte >= 32 && byte <= 126 ? String.fromCharCode(byte) : ".";
+						byte >= 32 && byte <= 126 ? String.fromCodePoint(byte) : ".";
 
 					return (
 						<button
@@ -295,7 +307,7 @@ const HexRow = ({
 							key={i}
 							onMouseDown={() => onByteMouseDown(globalIndex)}
 							onMouseEnter={() => onByteMouseEnter(globalIndex)}
-							className={`cursor-pointer select-none ${
+							className={`cursor-pointer w-4 h-4 select-none ${
 								selected
 									? "bg-primary text-primary-foreground"
 									: "hover:bg-accent"
