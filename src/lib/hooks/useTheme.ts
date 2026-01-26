@@ -3,36 +3,36 @@ import { useEffect, useState } from "preact/hooks";
 type Theme = "light" | "dark";
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem("theme");
-    return (stored === "dark" ? "dark" : "light") as Theme;
-  });
+	const [theme, setTheme] = useState<Theme>(() => {
+		const stored = localStorage.getItem("theme");
+		return (stored === "dark" ? "dark" : "light") as Theme;
+	});
 
-  useEffect(() => {
-    const root = document.documentElement;
-    
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+	useEffect(() => {
+		const root = document.documentElement;
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  };
+		if (theme === "dark") {
+			root.classList.add("dark");
+		} else {
+			root.classList.remove("dark");
+		}
 
-  const setDarkTheme = () => setTheme("dark");
-  const setLightTheme = () => setTheme("light");
+		localStorage.setItem("theme", theme);
+	}, [theme]);
 
-  return {
-    theme,
-    isDark: theme === "dark",
-    toggleTheme,
-    setTheme,
-    setDarkTheme,
-    setLightTheme,
-  };
+	const toggleTheme = () => {
+		setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+	};
+
+	const setDarkTheme = () => setTheme("dark");
+	const setLightTheme = () => setTheme("light");
+
+	return {
+		theme,
+		isDark: theme === "dark",
+		toggleTheme,
+		setTheme,
+		setDarkTheme,
+		setLightTheme,
+	};
 }
