@@ -1,4 +1,4 @@
-import { ScrollArea, ScrollAreaScrollbar } from "@base-ui/react";
+import { ScrollArea } from "@base-ui/react";
 import { XIcon } from "lucide-preact";
 
 export interface Tab {

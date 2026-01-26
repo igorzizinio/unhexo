@@ -1,7 +1,6 @@
 import { ContextMenu } from "@base-ui/react/context-menu";
 import type { TargetedUIEvent } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import StatusBar from "../status-bar";
 
 interface HexViewerProps {
 	data: Uint8Array | null;
@@ -12,7 +11,7 @@ const ROW_HEIGHT = 24;
 const BYTES_PER_ROW = 16;
 const OVERSCAN = 15; // Linhas extras para renderizar acima e abaixo
 
-export function HexViewer({ data, fileName }: Readonly<HexViewerProps>) {
+export function HexViewer({ data }: Readonly<HexViewerProps>) {
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	const [scrollTop, setScrollTop] = useState(0);
@@ -128,6 +127,19 @@ export function HexViewer({ data, fileName }: Readonly<HexViewerProps>) {
 			.join("");
 		navigator.clipboard.writeText(ascii);
 	};
+
+	useEffect(() => {
+		function handleKeyDown(e: KeyboardEvent) {
+			if (e.ctrlKey && e.key === "a") {
+				e.preventDefault();
+				setSelectionStart(0);
+				setSelectionEnd(data ? data.length - 1 : 0);
+			}
+		}
+
+		globalThis.addEventListener("keydown", handleKeyDown);
+		return () => globalThis.removeEventListener("keydown", handleKeyDown);
+	}, [data]);
 
 	return (
 		<div className="h-full flex flex-col bg-background">
