@@ -17,7 +17,7 @@ function AppContent() {
 				onTabClick={setActiveTab}
 				onTabClose={closeTab}
 			/>
-			<main className="flex-1 overf	low-hidden">
+			<main className="flex-1 overflow-hidden">
 				<HexViewer
 					data={activeTab?.data || null}
 					fileName={activeTab?.fileName}
