@@ -52,6 +52,37 @@ export function HexViewer({
 	);
 
 	// =============================
+	// Copy actions
+	// =============================
+
+	const copyOffset = useCallback(() => {
+		if (selectedByte === null) return;
+		navigator.clipboard.writeText(
+			`0x${selectedByte.toString(16).padStart(8, "0").toUpperCase()}`,
+		);
+	}, [selectedByte]);
+
+	const copySelectionHex = useCallback(() => {
+		if (selectionStart === null || selectionEnd === null) return;
+		const start = Math.min(selectionStart, selectionEnd);
+		const end = Math.max(selectionStart, selectionEnd);
+		const hex = Array.from(buffer.slice(start, end + 1))
+			.map((b) => b.toString(16).padStart(2, "0").toUpperCase())
+			.join(" ");
+		navigator.clipboard.writeText(hex);
+	}, [buffer, selectionStart, selectionEnd]);
+
+	const copySelectionAscii = useCallback(() => {
+		if (selectionStart === null || selectionEnd === null) return;
+		const start = Math.min(selectionStart, selectionEnd);
+		const end = Math.max(selectionStart, selectionEnd);
+		const ascii = Array.from(buffer.slice(start, end + 1))
+			.map((b) => (b >= 32 && b <= 126 ? String.fromCodePoint(b) : "."))
+			.join("");
+		navigator.clipboard.writeText(ascii);
+	}, [buffer, selectionStart, selectionEnd]);
+
+	// =============================
 	// Effects
 	// =============================
 
@@ -87,21 +118,33 @@ export function HexViewer({
 	// =============================
 
 	useEffect(() => {
-		function handleKeyDown(e: KeyboardEvent) {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			// Ctrl/Cmd shortcuts
 			if (e.ctrlKey || e.metaKey) {
-				if (e.key.toLowerCase() === "s") {
-					e.preventDefault();
-					onSaveRequest?.(buffer);
-				}
+				switch (e.key.toLowerCase()) {
+					case "c": {
+						e.preventDefault();
+						copySelectionHex();
+						return;
+					}
 
-				if (e.key.toLowerCase() === "a") {
-					e.preventDefault();
-					setSelectionStart(0);
-					setSelectionEnd(buffer.length - 1);
+					case "s": {
+						e.preventDefault();
+						onSaveRequest?.(buffer);
+						return;
+					}
+
+					case "a": {
+						e.preventDefault();
+						setSelectionStart(0);
+						setSelectionEnd(buffer.length - 1);
+						return;
+					}
 				}
 				return;
 			}
 
+			// Escape
 			if (e.key === "Escape") {
 				setSelectionStart(null);
 				setSelectionEnd(null);
@@ -110,42 +153,54 @@ export function HexViewer({
 				return;
 			}
 
-			// Arrow keys navigation
-			if (selectedByte !== null) {
-				let newIndex = selectedByte;
-				if (e.key === "ArrowRight")
-					newIndex = Math.min(selectedByte + 1, buffer.length - 1);
-				else if (e.key === "ArrowLeft")
-					newIndex = Math.max(selectedByte - 1, 0);
-				else if (e.key === "ArrowDown")
-					newIndex = Math.min(selectedByte + BYTES_PER_ROW, buffer.length - 1);
-				else if (e.key === "ArrowUp")
-					newIndex = Math.max(selectedByte - BYTES_PER_ROW, 0);
-				else if (e.key === "Backspace")
-					newIndex = Math.max(selectedByte - 1, 0);
-				else if (e.key === "Tab") {
-					// Here we prevent default always because of browser default tab behavior
-					// should we move to first byte when at the end? (if so, we need to add this to backspace too!)
-					e.preventDefault();
-					newIndex = Math.min(selectedByte + 1, buffer.length - 1);
-				} else if (e.key === "Home") newIndex = 0;
-				else if (e.key === "End") newIndex = buffer.length - 1;
+			// Navigation (só se tiver byte selecionado)
+			if (selectedByte === null) return;
 
-				if (newIndex !== selectedByte) {
+			// Arrow keys
+			let newIndex = selectedByte;
+			switch (e.key) {
+				case "ArrowRight":
+					newIndex = Math.min(selectedByte + 1, buffer.length - 1);
+					break;
+				case "ArrowLeft":
+					newIndex = Math.max(selectedByte - 1, 0);
+					break;
+				case "ArrowDown":
+					newIndex = Math.min(selectedByte + BYTES_PER_ROW, buffer.length - 1);
+					break;
+				case "ArrowUp":
+					newIndex = Math.max(selectedByte - BYTES_PER_ROW, 0);
+					break;
+				case "Backspace":
+					newIndex = Math.max(selectedByte - 1, 0);
+					break;
+				case "Tab":
 					e.preventDefault();
-					setSelectedByte(newIndex);
-					if (e.shiftKey) {
-						setSelectionEnd(newIndex);
-					} else {
-						setSelectionStart(newIndex);
-						setSelectionEnd(newIndex);
-					}
-					setHexNibble("high");
-					return;
-				}
+					newIndex = Math.min(selectedByte + 1, buffer.length - 1);
+					break;
+				case "Home":
+					newIndex = 0;
+					break;
+				case "End":
+					newIndex = buffer.length - 1;
+					break;
 			}
 
-			if (!/^[0-9a-fA-F]$/.test(e.key) || selectedByte === null) return;
+			if (newIndex !== selectedByte) {
+				e.preventDefault();
+				setSelectedByte(newIndex);
+				if (e.shiftKey) {
+					setSelectionEnd(newIndex);
+				} else {
+					setSelectionStart(newIndex);
+					setSelectionEnd(newIndex);
+				}
+				setHexNibble("high");
+				return;
+			}
+
+			// Hex input
+			if (!/^[0-9a-fA-F]$/.test(e.key)) return;
 
 			e.preventDefault();
 
@@ -168,11 +223,20 @@ export function HexViewer({
 
 			setBuffer(newBuffer);
 			onHasChanged?.(true);
-		}
+		};
 
 		globalThis.addEventListener("keydown", handleKeyDown);
 		return () => globalThis.removeEventListener("keydown", handleKeyDown);
-	}, [buffer, selectedByte, hexNibble, onHasChanged, onSaveRequest]);
+	}, [
+		buffer,
+		selectedByte,
+		hexNibble,
+		selectionStart,
+		selectionEnd,
+		onHasChanged,
+		onSaveRequest,
+		copySelectionHex,
+	]);
 
 	// =============================
 	// Scroll / Virtualization
@@ -214,37 +278,6 @@ export function HexViewer({
 		},
 		[isSelecting, selectionStart],
 	);
-
-	// =============================
-	// Copy actions
-	// =============================
-
-	const copyOffset = () => {
-		if (selectedByte === null) return;
-		navigator.clipboard.writeText(
-			`0x${selectedByte.toString(16).padStart(8, "0").toUpperCase()}`,
-		);
-	};
-
-	const copySelectionHex = () => {
-		if (selectionStart === null || selectionEnd === null) return;
-		const start = Math.min(selectionStart, selectionEnd);
-		const end = Math.max(selectionStart, selectionEnd);
-		const hex = Array.from(buffer.slice(start, end + 1))
-			.map((b) => b.toString(16).padStart(2, "0").toUpperCase())
-			.join(" ");
-		navigator.clipboard.writeText(hex);
-	};
-
-	const copySelectionAscii = () => {
-		if (selectionStart === null || selectionEnd === null) return;
-		const start = Math.min(selectionStart, selectionEnd);
-		const end = Math.max(selectionStart, selectionEnd);
-		const ascii = Array.from(buffer.slice(start, end + 1))
-			.map((b) => (b >= 32 && b <= 126 ? String.fromCodePoint(b) : "."))
-			.join("");
-		navigator.clipboard.writeText(ascii);
-	};
 
 	// =============================
 	// Render
@@ -296,7 +329,7 @@ export function HexViewer({
 						<ContextMenu.Popup className="bg-popover border rounded-md shadow-md py-1 text-foreground">
 							<ContextMenu.Item
 								onClick={copyOffset}
-								className="px-4 py-2 hover:bg-accent"
+								className="px-4 py-2 hover:bg-accent cursor-pointer"
 							>
 								Copy Offset
 							</ContextMenu.Item>
@@ -305,13 +338,13 @@ export function HexViewer({
 								<>
 									<ContextMenu.Item
 										onClick={copySelectionHex}
-										className="px-4 py-2 hover:bg-accent"
+										className="px-4 py-2 hover:bg-accent cursor-pointer"
 									>
 										Copy as Hex
 									</ContextMenu.Item>
 									<ContextMenu.Item
 										onClick={copySelectionAscii}
-										className="px-4 py-2 hover:bg-accent"
+										className="px-4 py-2 hover:bg-accent cursor-pointer"
 									>
 										Copy as ASCII
 									</ContextMenu.Item>
@@ -363,6 +396,7 @@ function HexRow({
 					if (idx >= data.length) return <span key={i} className="w-6" />;
 
 					const selected = isByteSelected(idx);
+					const modified = data[idx] !== original[idx];
 
 					return (
 						<button
@@ -378,11 +412,10 @@ function HexRow({
 							className={`w-6 h-6 ${
 								selected
 									? "bg-primary text-primary-foreground"
-									: "hover:bg-accent"
-							}
-
-								${data[idx] === original[idx] ? "" : "bg-secondary"}
-							`}
+									: modified
+										? "bg-yellow-500/20 hover:bg-yellow-500/30"
+										: "hover:bg-accent"
+							}`}
 						>
 							{data[idx].toString(16).padStart(2, "0").toUpperCase()}
 						</button>
