@@ -6,6 +6,7 @@ export interface Tab {
 	fileName: string;
 	filePath: string;
 	data: Uint8Array;
+	hasChanged?: boolean;
 }
 
 interface TabsProps {

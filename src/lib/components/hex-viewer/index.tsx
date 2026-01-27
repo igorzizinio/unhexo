@@ -277,6 +277,7 @@ export function HexViewer({
 								(_, i) => startRow + i,
 							).map((rowIndex) => (
 								<HexRow
+									original={data || new Uint8Array(0)}
 									key={rowIndex}
 									index={rowIndex}
 									data={buffer}
@@ -292,7 +293,7 @@ export function HexViewer({
 
 				<ContextMenu.Portal>
 					<ContextMenu.Positioner side="bottom" align="start">
-						<ContextMenu.Popup className="bg-popover border rounded-md shadow-md py-1">
+						<ContextMenu.Popup className="bg-popover border rounded-md shadow-md py-1 text-foreground">
 							<ContextMenu.Item
 								onClick={copyOffset}
 								className="px-4 py-2 hover:bg-accent"
@@ -331,12 +332,14 @@ export function HexViewer({
 function HexRow({
 	index,
 	data,
+	original,
 	offsetTop,
 	isByteSelected,
 	onByteMouseDown,
 	onByteMouseEnter,
 }: Readonly<{
 	index: number;
+	original: Uint8Array;
 	data: Uint8Array;
 	offsetTop: number;
 	isByteSelected: (i: number) => boolean;
@@ -350,11 +353,11 @@ function HexRow({
 			style={{ top: offsetTop }}
 			className="absolute left-0 right-0 h-6 flex gap-4 px-4 font-mono text-xs"
 		>
-			<div className="w-20 text-muted-foreground">
+			<div className="w-20 text-muted-foreground select-none">
 				{offset.toString(16).padStart(8, "0").toUpperCase()}
 			</div>
 
-			<div className="flex">
+			<div className="flex select-none">
 				{Array.from({ length: BYTES_PER_ROW }, (_, i) => {
 					const idx = offset + i;
 					if (idx >= data.length) return <span key={i} className="w-6" />;
@@ -376,7 +379,10 @@ function HexRow({
 								selected
 									? "bg-primary text-primary-foreground"
 									: "hover:bg-accent"
-							}`}
+							}
+
+								${data[idx] === original[idx] ? "" : "bg-secondary"}
+							`}
 						>
 							{data[idx].toString(16).padStart(2, "0").toUpperCase()}
 						</button>
@@ -384,7 +390,7 @@ function HexRow({
 				})}
 			</div>
 
-			<div className="flex text-muted-foreground">
+			<div className="flex text-muted-foreground select-none">
 				{Array.from({ length: BYTES_PER_ROW }, (_, i) => {
 					const idx = offset + i;
 					if (idx >= data.length) return <span key={i} />;
@@ -398,8 +404,13 @@ function HexRow({
 						<button
 							key={i}
 							type="button"
-							onPointerDown={() => onByteMouseDown(idx)}
-							onPointerEnter={() => onByteMouseEnter(idx)}
+							onPointerDown={(e) => {
+								if (e.button === 0) {
+									e.preventDefault();
+									onByteMouseDown(idx);
+								}
+							}}
+							onPointerEnter={(e) => e.buttons === 1 && onByteMouseEnter(idx)}
 							className={`w-4 h-4 ${
 								isByteSelected(idx)
 									? "bg-primary text-primary-foreground"

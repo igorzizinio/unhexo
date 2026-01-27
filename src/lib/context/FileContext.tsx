@@ -1,85 +1,114 @@
+import { writeFile } from "@tauri-apps/plugin-fs";
 import { createContext } from "preact";
-import { useContext, useState } from "preact/hooks";
-import type { Tab } from "../components/tabs";
+import { useContext, useMemo, useState } from "preact/hooks";
+
+export interface Tab {
+	id: string;
+	fileName: string;
+	filePath: string;
+	data: Uint8Array;
+	hasChanged: boolean;
+}
+
+export interface PersistedTab {
+	id: string;
+	filePath: string;
+	fileName: string;
+	hasChanged: boolean;
+}
 
 interface FileContextType {
 	tabs: Tab[];
 	activeTabId: string | null;
+	activeTab: Tab | null;
 	openFile: (filePath: string, fileName: string, data: Uint8Array) => void;
 	closeTab: (id: string) => void;
 	setActiveTab: (id: string) => void;
-	getActiveTab: () => Tab | null;
+	markAsChanged: (id: string, hasChanged: boolean) => void;
+	saveTab: (id: string, data: Uint8Array) => Promise<void>;
 }
 
 const FileContext = createContext<FileContextType | null>(null);
 
 export function FileProvider({
 	children,
-}: {
+}: Readonly<{
 	children: preact.ComponentChildren;
-}) {
+}>) {
 	const [tabs, setTabs] = useState<Tab[]>([]);
 	const [activeTabId, setActiveTabId] = useState<string | null>(null);
 
+	const activeTab = useMemo(
+		() => tabs.find((tab) => tab.id === activeTabId) ?? null,
+		[tabs, activeTabId],
+	);
+
 	const openFile = (filePath: string, fileName: string, data: Uint8Array) => {
-		// Check if file is already open
-		const existingTab = tabs.find((tab) => tab.filePath === filePath);
-		if (existingTab) {
-			setActiveTabId(existingTab.id);
-			return;
+		const existing = tabs.find((tab) => tab.filePath === filePath);
+
+		if (existing) {
+			setActiveTabId(existing.id);
+		} else {
+			const newTab: Tab = {
+				id: crypto.randomUUID(),
+				fileName,
+				filePath,
+				data,
+				hasChanged: false,
+			};
+			setTabs((prev) => [...prev, newTab]);
+			setActiveTabId(newTab.id);
 		}
-
-		// Create new tab
-		const newTab: Tab = {
-			id: crypto.randomUUID(),
-			fileName,
-			filePath,
-			data,
-		};
-
-		setTabs((prev) => [...prev, newTab]);
-		setActiveTabId(newTab.id);
 	};
 
 	const closeTab = (id: string) => {
-		setTabs((prev) => {
-			const filtered = prev.filter((tab) => tab.id !== id);
+		const index = tabs.findIndex((tab) => tab.id === id);
+		const filtered = tabs.filter((tab) => tab.id !== id);
 
-			// If we're closing the active tab, switch to another one
-			if (activeTabId === id && filtered.length > 0) {
-				const index = prev.findIndex((tab) => tab.id === id);
-				const nextTab = filtered[Math.max(0, index - 1)];
-				setActiveTabId(nextTab.id);
-			} else if (filtered.length === 0) {
+		setTabs(filtered);
+
+		if (activeTabId === id) {
+			if (filtered.length > 0) {
+				const nextIndex = Math.max(0, index - 1);
+				setActiveTabId(filtered[nextIndex].id);
+			} else {
 				setActiveTabId(null);
 			}
-
-			return filtered;
-		});
+		}
 	};
 
-	const setActiveTab = (id: string) => {
-		setActiveTabId(id);
+	const saveTab = async (id: string, data: Uint8Array) => {
+		const tab = tabs.find((t) => t.id === id);
+		if (!tab) return;
+
+		await writeFile(tab.filePath, data);
+
+		setTabs((prev) =>
+			prev.map((t) => (t.id === id ? { ...t, data, hasChanged: false } : t)),
+		);
 	};
 
-	const getActiveTab = () => {
-		return tabs.find((tab) => tab.id === activeTabId) || null;
+	const markAsChanged = (id: string, hasChanged: boolean) => {
+		setTabs((prev) =>
+			prev.map((tab) => (tab.id === id ? { ...tab, hasChanged } : tab)),
+		);
 	};
 
-	return (
-		<FileContext.Provider
-			value={{
-				tabs,
-				activeTabId,
-				openFile,
-				closeTab,
-				setActiveTab,
-				getActiveTab,
-			}}
-		>
-			{children}
-		</FileContext.Provider>
+	const value = useMemo(
+		() => ({
+			tabs,
+			activeTabId,
+			activeTab,
+			openFile,
+			closeTab,
+			setActiveTab: setActiveTabId,
+			markAsChanged,
+			saveTab,
+		}),
+		[tabs, activeTabId, activeTab],
 	);
+
+	return <FileContext.Provider value={value}>{children}</FileContext.Provider>;
 }
 
 export function useFiles() {

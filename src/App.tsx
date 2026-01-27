@@ -1,5 +1,3 @@
-import { writeFile } from "@tauri-apps/plugin-fs";
-import { useState } from "preact/hooks";
 import { HexViewer } from "./lib/components/hex-viewer";
 import StatusBar from "./lib/components/status-bar";
 import { Tabs } from "./lib/components/tabs";
@@ -7,17 +5,19 @@ import Titlebar from "./lib/components/titlebar";
 import { FileProvider, useFiles } from "./lib/context/FileContext";
 
 function AppContent() {
-	const { tabs, activeTabId, setActiveTab, closeTab, getActiveTab } =
-		useFiles();
-	const activeTab = getActiveTab();
-
-	const [hasChanged, setHasChanged] = useState(false);
+	const {
+		tabs,
+		activeTabId,
+		setActiveTab,
+		closeTab,
+		activeTab,
+		saveTab,
+		markAsChanged,
+	} = useFiles();
 
 	async function handleSaveRequest(data: Uint8Array) {
 		if (activeTab) {
-			await writeFile(activeTab.filePath, data);
-
-			setHasChanged(false);
+			await saveTab(activeTab.id, data);
 			console.log(`File "${activeTab.fileName}" saved successfully!`);
 		}
 	}
@@ -34,11 +34,15 @@ function AppContent() {
 			<main className="flex-1 overflow-hidden">
 				<HexViewer
 					data={activeTab?.data || null}
-					onHasChanged={setHasChanged}
+					onHasChanged={(hasChanged) => {
+						if (activeTab) {
+							markAsChanged(activeTab.id, hasChanged);
+						}
+					}}
 					onSaveRequest={handleSaveRequest}
 				/>
 			</main>
-			<StatusBar hasChanged={hasChanged} />
+			<StatusBar hasChanged={activeTab?.hasChanged || false} />
 		</div>
 	);
 }

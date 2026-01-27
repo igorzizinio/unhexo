@@ -1293,6 +1293,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tauri-apps/plugin-store@npm:~2":
+  version: 2.4.2
+  resolution: "@tauri-apps/plugin-store@npm:2.4.2"
+  dependencies:
+    "@tauri-apps/api": "npm:^2.8.0"
+  checksum: 10c0/6892417dbd3e97c4a70e00ca437a196a65499831e7b3a5dc5b71646596a16c4030f23dedfa124ed853c73999a5b8e48de129fb0369e7af7c987142e060b58127
+  languageName: node
+  linkType: hard
+
 "@tybys/wasm-util@npm:^0.10.1":
   version: 0.10.1
   resolution: "@tybys/wasm-util@npm:0.10.1"
@@ -2501,6 +2510,7 @@ __metadata:
     "@tauri-apps/plugin-fs": "npm:~2"
     "@tauri-apps/plugin-opener": "npm:^2"
     "@tauri-apps/plugin-process": "npm:~2"
+    "@tauri-apps/plugin-store": "npm:~2"
     lucide-preact: "npm:^0.563.0"
     preact: "npm:^10.25.1"
     tailwindcss: "npm:^4.1.18"
