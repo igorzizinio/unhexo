@@ -117,34 +117,29 @@ export function HexViewer({
 	// Keyboard
 	// =============================
 
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			// Ctrl/Cmd shortcuts
+	const handleKeyDown = useCallback(
+		(e: KeyboardEvent) => {
+			// Ctrl / Cmd
 			if (e.ctrlKey || e.metaKey) {
 				switch (e.key.toLowerCase()) {
-					case "c": {
+					case "c":
 						e.preventDefault();
 						copySelectionHex();
 						return;
-					}
 
-					case "s": {
+					case "s":
 						e.preventDefault();
 						onSaveRequest?.(buffer);
 						return;
-					}
 
-					case "a": {
+					case "a":
 						e.preventDefault();
 						setSelectionStart(0);
 						setSelectionEnd(buffer.length - 1);
 						return;
-					}
 				}
-				return;
 			}
 
-			// Escape
 			if (e.key === "Escape") {
 				setSelectionStart(null);
 				setSelectionEnd(null);
@@ -153,11 +148,10 @@ export function HexViewer({
 				return;
 			}
 
-			// Navigation (só se tiver byte selecionado)
 			if (selectedByte === null) return;
 
-			// Arrow keys
 			let newIndex = selectedByte;
+
 			switch (e.key) {
 				case "ArrowRight":
 					newIndex = Math.min(selectedByte + 1, buffer.length - 1);
@@ -199,7 +193,6 @@ export function HexViewer({
 				return;
 			}
 
-			// Hex input
 			if (!/^[0-9a-fA-F]$/.test(e.key)) return;
 
 			e.preventDefault();
@@ -213,7 +206,6 @@ export function HexViewer({
 				setHexNibble("low");
 			} else {
 				newBuffer[selectedByte] = (current & 0xf0) | hex;
-
 				const next = Math.min(selectedByte + 1, buffer.length - 1);
 				setSelectedByte(next);
 				setSelectionStart(next);
@@ -223,20 +215,16 @@ export function HexViewer({
 
 			setBuffer(newBuffer);
 			onHasChanged?.(true);
-		};
-
-		globalThis.addEventListener("keydown", handleKeyDown);
-		return () => globalThis.removeEventListener("keydown", handleKeyDown);
-	}, [
-		buffer,
-		selectedByte,
-		hexNibble,
-		selectionStart,
-		selectionEnd,
-		onHasChanged,
-		onSaveRequest,
-		copySelectionHex,
-	]);
+		},
+		[
+			buffer,
+			selectedByte,
+			hexNibble,
+			copySelectionHex,
+			onSaveRequest,
+			onHasChanged,
+		],
+	);
 
 	// =============================
 	// Scroll / Virtualization
@@ -284,7 +272,12 @@ export function HexViewer({
 	// =============================
 
 	return (
-		<div className="h-full flex flex-col bg-background">
+		<div
+			className="h-full flex flex-col bg-background"
+			tabIndex={0}
+			onPointerDown={() => containerRef.current?.focus()}
+			onKeyDown={handleKeyDown}
+		>
 			<div className="bg-muted border-b border-border px-4 py-2 flex gap-4 font-mono text-xs">
 				<div className="w-20">Offset</div>
 				<div className="flex">
