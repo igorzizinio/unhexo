@@ -98,7 +98,7 @@ export function HexViewer({
 		if (!containerRef.current) return;
 
 		const updateSize = () =>
-			setContainerHeight(containerRef.current!.clientHeight);
+			setContainerHeight(containerRef.current?.clientHeight || 600);
 
 		const ro = new ResizeObserver(updateSize);
 		ro.observe(containerRef.current);

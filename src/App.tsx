@@ -91,7 +91,13 @@ function AppContent() {
 
 	return (
 		<div className="root h-screen flex flex-col overflow-hidden bg-background text-foreground">
-			<Titlebar viewMode={viewMode} setViewMode={setViewMode} />
+			<Titlebar
+				viewMode={viewMode}
+				setViewMode={setViewMode}
+				onSaveRequest={() =>
+					alert("Not implemented, use Ctrl+S / Cmd+S to save the file.")
+				}
+			/>
 			<Tabs
 				tabs={tabs}
 				activeTabId={activeTabId}

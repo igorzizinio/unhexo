@@ -1,3 +1,4 @@
+import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { createContext } from "preact";
 import { useContext, useMemo, useState } from "preact/hooks";
@@ -5,7 +6,7 @@ import { useContext, useMemo, useState } from "preact/hooks";
 export interface Tab {
 	id: string;
 	fileName: string;
-	filePath: string;
+	filePath: string | null;
 	data: Uint8Array;
 	hasChanged: boolean;
 }
@@ -21,7 +22,11 @@ interface FileContextType {
 	tabs: Tab[];
 	activeTabId: string | null;
 	activeTab: Tab | null;
-	openFile: (filePath: string, fileName: string, data: Uint8Array) => void;
+	openFile: (
+		filePath: string | null,
+		fileName: string,
+		data: Uint8Array,
+	) => void;
 	closeTab: (id: string) => void;
 	setActiveTab: (id: string) => void;
 	markAsChanged: (id: string, hasChanged: boolean) => void;
@@ -43,7 +48,11 @@ export function FileProvider({
 		[tabs, activeTabId],
 	);
 
-	const openFile = (filePath: string, fileName: string, data: Uint8Array) => {
+	const openFile = (
+		filePath: string | null,
+		fileName: string,
+		data: Uint8Array,
+	) => {
 		const existing = tabs.find((tab) => tab.filePath === filePath);
 
 		if (existing) {
@@ -81,7 +90,11 @@ export function FileProvider({
 		const tab = tabs.find((t) => t.id === id);
 		if (!tab) return;
 
-		await writeFile(tab.filePath, data);
+		const path = tab.filePath ?? (await save());
+
+		if (!path) throw new Error("No file path specified.");
+
+		await writeFile(path, data);
 
 		setTabs((prev) =>
 			prev.map((t) => (t.id === id ? { ...t, data, hasChanged: false } : t)),

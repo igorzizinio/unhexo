@@ -1,13 +1,6 @@
 import { ScrollArea } from "@base-ui/react";
 import { XIcon } from "lucide-preact";
-
-export interface Tab {
-	id: string;
-	fileName: string;
-	filePath: string;
-	data: Uint8Array;
-	hasChanged?: boolean;
-}
+import type { Tab } from "../../context/FileContext";
 
 interface TabsProps {
 	tabs: Tab[];
@@ -37,7 +30,7 @@ export function Tabs({ tabs, activeTabId, onTabClick, onTabClose }: TabsProps) {
 							role="tab"
 							aria-selected={isActive}
 							tabIndex={isActive ? 0 : -1}
-							title={tab.filePath}
+							title={tab.filePath ?? undefined}
 							className={`
 								flex items-center justify-between gap-2 px-3 py-2 text-sm cursor-pointer border-b-2 min-w-28 w-46 text-ellipsis overflow-hidden
 								select-none

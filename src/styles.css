@@ -71,7 +71,6 @@
 		--ring: 87.8% 0.019 257.22;
 	}
 
-
 	body {
 		scrollbar-color: var(--color-border) var(--color-background);
 	}
@@ -88,5 +87,3 @@
 .no-drag {
 	-webkit-app-region: no-drag;
 }
-
-
