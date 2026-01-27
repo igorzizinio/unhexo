@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/lib/components/hex-viewer/index.tsx","./src/lib/components/status-bar/index.tsx","./src/lib/components/tabs/index.tsx","./src/lib/components/titlebar/index.tsx","./src/lib/context/filecontext.tsx","./src/lib/hooks/usetheme.ts"],"version":"5.9.3"}

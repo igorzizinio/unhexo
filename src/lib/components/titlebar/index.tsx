@@ -6,16 +6,23 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { readFile } from "@tauri-apps/plugin-fs";
 import { exit } from "@tauri-apps/plugin-process";
 import {
+	ChevronRightIcon,
 	MaximizeIcon,
 	MinusIcon,
 	MoonIcon,
 	SunIcon,
 	XIcon,
 } from "lucide-preact";
+import type { ViewMode } from "../../../App";
 import { useFiles } from "../../context/FileContext";
 import { useTheme } from "../../hooks/useTheme";
 
-const Titlebar = () => {
+interface TitlebarProps {
+	viewMode: string;
+	setViewMode: (mode: ViewMode) => void;
+}
+
+const Titlebar = ({ setViewMode }: TitlebarProps) => {
 	const appWindow = getCurrentWindow();
 	const { theme, toggleTheme } = useTheme();
 	const { openFile: addFile } = useFiles();
@@ -77,6 +84,58 @@ const Titlebar = () => {
 								<Menu.Item className="flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors rounded-sm mx-1">
 									Save
 								</Menu.Item>
+							</Menu.Popup>
+						</Menu.Positioner>
+					</Menu.Portal>
+				</Menu.Root>
+
+				<Menu.Root>
+					<Menu.Trigger className="h-8 rounded px-3 text-sm select-none text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+						Analyze
+					</Menu.Trigger>
+					<Menu.Portal>
+						<Menu.Positioner className="outline-none" sideOffset={6}>
+							<Menu.Popup className="origin-[var(--transform-origin)] rounded-md bg-popover text-popover-foreground py-1 shadow-lg border border-border data-[ending-style]:opacity-0 data-[ending-style]:transition-opacity data-[instant]:transition-none">
+								<Menu.Item className="flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors rounded-sm mx-1">
+									Compare files
+								</Menu.Item>
+							</Menu.Popup>
+						</Menu.Positioner>
+					</Menu.Portal>
+				</Menu.Root>
+
+				<Menu.Root>
+					<Menu.Trigger className="h-8 rounded px-3 text-sm select-none text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+						View
+					</Menu.Trigger>
+					<Menu.Portal>
+						<Menu.Positioner className="outline-none" sideOffset={6}>
+							<Menu.Popup className="origin-[var(--transform-origin)] rounded-md bg-popover text-popover-foreground py-1 shadow-lg border border-border data-[ending-style]:opacity-0 data-[ending-style]:transition-opacity data-[instant]:transition-none">
+								<Menu.SubmenuRoot>
+									<Menu.SubmenuTrigger className="flex w-full cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground rounded-sm">
+										Layout
+										<ChevronRightIcon size={14} />
+									</Menu.SubmenuTrigger>
+
+									<Menu.Portal>
+										<Menu.Positioner className="outline-none">
+											<Menu.Popup className="rounded-md bg-popover text-popover-foreground py-1 shadow-lg border border-border">
+												<Menu.Item
+													onClick={() => setViewMode("tabs")}
+													className="flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground rounded-sm"
+												>
+													Tabs
+												</Menu.Item>
+												<Menu.Item
+													onClick={() => setViewMode("mosaic")}
+													className="flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground rounded-sm"
+												>
+													Mosaic
+												</Menu.Item>
+											</Menu.Popup>
+										</Menu.Positioner>
+									</Menu.Portal>
+								</Menu.SubmenuRoot>
 							</Menu.Popup>
 						</Menu.Positioner>
 					</Menu.Portal>

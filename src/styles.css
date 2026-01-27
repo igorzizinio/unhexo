@@ -20,6 +20,8 @@
 	--color-border: oklch(var(--border));
 	--color-input: oklch(var(--input));
 	--color-ring: oklch(var(--ring));
+	--color-highlight: oklch(var(--highlight));
+	--color-highlight-foreground: oklch(var(--highlight-foreground));
 }
 
 @layer base {
@@ -56,6 +58,8 @@
 		--primary-foreground: 16.5% 0.031 285.82;
 		--secondary: 26.8% 0.03 257.22;
 		--secondary-foreground: 98.3% 0.007 264.53;
+		--highlight: 41.2% 0.145 27.33;
+		--highlight-foreground: 98.3% 0.007 264.53;
 		--muted: 26.8% 0.03 257.22;
 		--muted-foreground: 73.9% 0.018 257.22;
 		--accent: 26.8% 0.03 257.22;
@@ -65,6 +69,11 @@
 		--border: 26.8% 0.03 257.22;
 		--input: 26.8% 0.03 257.22;
 		--ring: 87.8% 0.019 257.22;
+	}
+
+
+	body {
+		scrollbar-color: var(--color-border) var(--color-background);
 	}
 }
 
@@ -79,3 +88,5 @@
 .no-drag {
 	-webkit-app-region: no-drag;
 }
+
+
