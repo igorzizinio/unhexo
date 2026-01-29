@@ -89,6 +89,27 @@ function AppContent() {
 		}
 	}
 
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.ctrlKey || e.metaKey) {
+				if (e.key === "Tab") {
+					e.preventDefault();
+					// Alternar para a próxima aba
+					if (tabs.length > 0) {
+						const currentIndex = tabs.findIndex(
+							(tab) => tab.id === activeTabId,
+						);
+						const nextIndex = (currentIndex + 1) % tabs.length;
+						setActiveTab(tabs[nextIndex].id);
+					}
+				}
+			}
+		};
+
+		globalThis.addEventListener("keydown", handleKeyDown);
+		return () => globalThis.removeEventListener("keydown", handleKeyDown);
+	}, [tabs, activeTabId, setActiveTab]);
+
 	return (
 		<div className="root h-screen flex flex-col overflow-hidden bg-background text-foreground">
 			<Titlebar
@@ -109,6 +130,8 @@ function AppContent() {
 				{viewMode === "tabs" && activeTab && (
 					<HexViewer
 						data={activeTab.data}
+						isActive
+						onActivate={() => setActiveTab(activeTab.id)}
 						onHasChanged={(hasChanged) =>
 							markAsChanged(activeTab.id, hasChanged)
 						}
@@ -129,6 +152,8 @@ function AppContent() {
 							return (
 								<HexViewer
 									data={tab?.data || null}
+									isActive={tab?.id === activeTabId}
+									onActivate={() => tab && setActiveTab(tab.id)}
 									onHasChanged={(hasChanged) => {
 										if (tab) markAsChanged(tab.id, hasChanged);
 									}}

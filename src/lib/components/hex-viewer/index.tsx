@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 
 interface HexViewerProps {
 	data: Uint8Array | null;
+	isActive?: boolean;
+	onActivate?: () => void;
 	onHasChanged?: (hasChanged: boolean) => void;
 	onSaveRequest?: (data: Uint8Array) => Promise<void>;
 }
@@ -14,6 +16,8 @@ const OVERSCAN = 15;
 
 export function HexViewer({
 	data,
+	isActive = false,
+	onActivate,
 	onHasChanged,
 	onSaveRequest,
 }: Readonly<HexViewerProps>) {
@@ -52,7 +56,7 @@ export function HexViewer({
 	);
 
 	// =============================
-	// Copy actions
+	// Copy
 	// =============================
 
 	const copyOffset = useCallback(() => {
@@ -114,24 +118,23 @@ export function HexViewer({
 	}, []);
 
 	// =============================
-	// Keyboard
+	// Keyboard (só quando ativo)
 	// =============================
 
-	const handleKeyDown = useCallback(
-		(e: KeyboardEvent) => {
-			// Ctrl / Cmd
+	useEffect(() => {
+		if (!isActive) return;
+
+		function handleKeyDown(e: KeyboardEvent) {
 			if (e.ctrlKey || e.metaKey) {
 				switch (e.key.toLowerCase()) {
 					case "c":
 						e.preventDefault();
 						copySelectionHex();
 						return;
-
 					case "s":
 						e.preventDefault();
 						onSaveRequest?.(buffer);
 						return;
-
 					case "a":
 						e.preventDefault();
 						setSelectionStart(0);
@@ -150,6 +153,38 @@ export function HexViewer({
 
 			if (selectedByte === null) return;
 
+			const key = e.key.toUpperCase();
+
+			if (/^[0-9A-F]$/.test(key)) {
+				e.preventDefault();
+
+				const value = parseInt(key, 16);
+				const newBuffer = buffer.slice();
+				const oldByte = newBuffer[selectedByte];
+
+				let newByte: number;
+
+				if (hexNibble === "high") {
+					newByte = (value << 4) | (oldByte & 0x0f);
+					setHexNibble("low");
+				} else {
+					newByte = (oldByte & 0xf0) | value;
+					setHexNibble("high");
+
+					// avança cursor
+					if (selectedByte < newBuffer.length - 1) {
+						setSelectedByte(selectedByte + 1);
+						setSelectionStart(selectedByte + 1);
+						setSelectionEnd(selectedByte + 1);
+					}
+				}
+
+				newBuffer[selectedByte] = newByte;
+				setBuffer(newBuffer);
+				onHasChanged?.(true);
+				return;
+			}
+
 			let newIndex = selectedByte;
 
 			switch (e.key) {
@@ -165,66 +200,26 @@ export function HexViewer({
 				case "ArrowUp":
 					newIndex = Math.max(selectedByte - BYTES_PER_ROW, 0);
 					break;
-				case "Backspace":
-					newIndex = Math.max(selectedByte - 1, 0);
-					break;
-				case "Tab":
-					e.preventDefault();
-					newIndex = Math.min(selectedByte + 1, buffer.length - 1);
-					break;
 				case "Home":
 					newIndex = 0;
 					break;
 				case "End":
 					newIndex = buffer.length - 1;
 					break;
+				default:
+					return;
 			}
-
-			if (newIndex !== selectedByte) {
-				e.preventDefault();
-				setSelectedByte(newIndex);
-				if (e.shiftKey) {
-					setSelectionEnd(newIndex);
-				} else {
-					setSelectionStart(newIndex);
-					setSelectionEnd(newIndex);
-				}
-				setHexNibble("high");
-				return;
-			}
-
-			if (!/^[0-9a-fA-F]$/.test(e.key)) return;
 
 			e.preventDefault();
+			setSelectedByte(newIndex);
+			setSelectionStart(newIndex);
+			setSelectionEnd(newIndex);
+			setHexNibble("high");
+		}
 
-			const hex = Number.parseInt(e.key, 16);
-			const newBuffer = buffer.slice();
-			const current = buffer[selectedByte];
-
-			if (hexNibble === "high") {
-				newBuffer[selectedByte] = (hex << 4) | (current & 0x0f);
-				setHexNibble("low");
-			} else {
-				newBuffer[selectedByte] = (current & 0xf0) | hex;
-				const next = Math.min(selectedByte + 1, buffer.length - 1);
-				setSelectedByte(next);
-				setSelectionStart(next);
-				setSelectionEnd(next);
-				setHexNibble("high");
-			}
-
-			setBuffer(newBuffer);
-			onHasChanged?.(true);
-		},
-		[
-			buffer,
-			selectedByte,
-			hexNibble,
-			copySelectionHex,
-			onSaveRequest,
-			onHasChanged,
-		],
-	);
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [isActive, buffer, selectedByte, copySelectionHex, onSaveRequest]);
 
 	// =============================
 	// Scroll / Virtualization
@@ -246,15 +241,16 @@ export function HexViewer({
 	);
 
 	// =============================
-	// Mouse handlers
+	// Mouse
 	// =============================
 
 	const handleByteMouseDown = useCallback(
 		(byteIndex: number) => {
+			onActivate?.();
 			setIsSelecting(true);
 			selectByte(byteIndex);
 		},
-		[selectByte],
+		[selectByte, onActivate],
 	);
 
 	const handleByteMouseEnter = useCallback(
@@ -268,18 +264,40 @@ export function HexViewer({
 	);
 
 	// =============================
+	// Auto-scroll para o byte selecionado
+	// =============================
+
+	useEffect(() => {
+		if (selectedByte === null) return;
+		if (!containerRef.current) return;
+
+		const rowIndex = Math.floor(selectedByte / BYTES_PER_ROW);
+		const byteTop = rowIndex * ROW_HEIGHT;
+		const byteBottom = byteTop + ROW_HEIGHT;
+
+		const viewTop = containerRef.current.scrollTop;
+		const viewBottom = viewTop + containerHeight;
+
+		if (byteTop < viewTop) {
+			containerRef.current.scrollTop = byteTop;
+			return;
+		}
+
+		if (byteBottom > viewBottom) {
+			containerRef.current.scrollTop = byteBottom - containerHeight;
+		}
+	}, [selectedByte, containerHeight]);
+
+	// =============================
 	// Render
 	// =============================
 
 	return (
 		<section
-			className="h-full flex flex-col bg-background"
-			// biome-ignore lint: nao existe uma tag apropriada para isso
-			tabIndex={0}
-			role="application"
-			aria-label="Hex Editor"
-			onPointerDown={() => containerRef.current?.focus()}
-			onKeyDown={handleKeyDown}
+			className={`h-full flex flex-col border transition-colors ${
+				isActive ? "border-primary ring-1 ring-primary/40" : "border-border"
+			}`}
+			onPointerDown={onActivate}
 		>
 			<div className="bg-muted border-b border-border px-4 py-2 flex gap-4 font-mono text-xs">
 				<div className="w-20">Offset</div>
@@ -306,7 +324,6 @@ export function HexViewer({
 								(_, i) => startRow + i,
 							).map((rowIndex) => (
 								<HexRow
-									original={data || new Uint8Array(0)}
 									key={rowIndex}
 									index={rowIndex}
 									data={buffer}
@@ -322,26 +339,16 @@ export function HexViewer({
 
 				<ContextMenu.Portal>
 					<ContextMenu.Positioner side="bottom" align="start">
-						<ContextMenu.Popup className="bg-popover border rounded-md shadow-md py-1 text-foreground">
-							<ContextMenu.Item
-								onClick={copyOffset}
-								className="px-4 py-2 hover:bg-accent cursor-pointer"
-							>
+						<ContextMenu.Popup className="bg-popover border rounded-md shadow-md py-1">
+							<ContextMenu.Item onClick={copyOffset}>
 								Copy Offset
 							</ContextMenu.Item>
-
 							{selectionStart !== selectionEnd && (
 								<>
-									<ContextMenu.Item
-										onClick={copySelectionHex}
-										className="px-4 py-2 hover:bg-accent cursor-pointer"
-									>
+									<ContextMenu.Item onClick={copySelectionHex}>
 										Copy as Hex
 									</ContextMenu.Item>
-									<ContextMenu.Item
-										onClick={copySelectionAscii}
-										className="px-4 py-2 hover:bg-accent cursor-pointer"
-									>
+									<ContextMenu.Item onClick={copySelectionAscii}>
 										Copy as ASCII
 									</ContextMenu.Item>
 								</>
@@ -361,20 +368,18 @@ export function HexViewer({
 function HexRow({
 	index,
 	data,
-	original,
 	offsetTop,
 	isByteSelected,
 	onByteMouseDown,
 	onByteMouseEnter,
-}: Readonly<{
+}: {
 	index: number;
-	original: Uint8Array;
 	data: Uint8Array;
 	offsetTop: number;
 	isByteSelected: (i: number) => boolean;
 	onByteMouseDown: (i: number) => void;
 	onByteMouseEnter: (i: number) => void;
-}>) {
+}) {
 	const offset = index * BYTES_PER_ROW;
 
 	return (
@@ -391,62 +396,24 @@ function HexRow({
 					const idx = offset + i;
 					if (idx >= data.length) return <span key={i} className="w-6" />;
 
-					const selected = isByteSelected(idx);
-					const modified = data[idx] !== original[idx];
-
 					return (
 						<button
 							key={i}
 							type="button"
+							tabIndex={-1}
 							onPointerDown={(e) => {
-								if (e.button === 0) {
-									e.preventDefault();
-									onByteMouseDown(idx);
-								}
+								if (e.button !== 0) return; // Ignorar botões que não sejam o esquerdo
+								e.preventDefault();
+								onByteMouseDown(idx);
 							}}
 							onPointerEnter={(e) => e.buttons === 1 && onByteMouseEnter(idx)}
 							className={`w-6 h-6 ${
-								selected
-									? "bg-primary text-primary-foreground"
-									: modified
-										? "bg-yellow-500/20 hover:bg-yellow-500/30"
-										: "hover:bg-accent"
-							}`}
-						>
-							{data[idx].toString(16).padStart(2, "0").toUpperCase()}
-						</button>
-					);
-				})}
-			</div>
-
-			<div className="flex text-muted-foreground select-none">
-				{Array.from({ length: BYTES_PER_ROW }, (_, i) => {
-					const idx = offset + i;
-					if (idx >= data.length) return <span key={i} />;
-
-					const c =
-						data[idx] >= 32 && data[idx] <= 126
-							? String.fromCodePoint(data[idx])
-							: ".";
-
-					return (
-						<button
-							key={i}
-							type="button"
-							onPointerDown={(e) => {
-								if (e.button === 0) {
-									e.preventDefault();
-									onByteMouseDown(idx);
-								}
-							}}
-							onPointerEnter={(e) => e.buttons === 1 && onByteMouseEnter(idx)}
-							className={`w-4 h-4 ${
 								isByteSelected(idx)
 									? "bg-primary text-primary-foreground"
 									: "hover:bg-accent"
 							}`}
 						>
-							{c}
+							{data[idx].toString(16).padStart(2, "0").toUpperCase()}
 						</button>
 					);
 				})}
