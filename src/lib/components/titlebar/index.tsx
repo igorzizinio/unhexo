@@ -38,7 +38,7 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 			filters: [
 				{
 					name: "All Files",
-					extensions: ["*"],
+					extensions: [],
 				},
 			],
 		});
