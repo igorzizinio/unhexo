@@ -1,10 +1,12 @@
 import { ContextMenu } from "@base-ui/react/context-menu";
 import type { TargetedUIEvent } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import { useFiles } from "../../context/FileContext";
 import HexRow from "../hex-row";
 
 interface HexViewerProps {
-	data: Uint8Array | null;
+	tabId: string;
+	buffer: Uint8Array;
 	isActive?: boolean;
 	onActivate?: () => void;
 	diffSet?: Set<number> | null;
@@ -17,13 +19,17 @@ const BYTES_PER_ROW = 16;
 const OVERSCAN = 15;
 
 export function HexViewer({
-	data,
+	tabId,
+	buffer,
 	isActive = false,
 	onActivate,
 	onHasChanged,
 	onSaveRequest,
 	diffSet,
 }: Readonly<HexViewerProps>) {
+	const { updateTabBuffer } = useFiles();
+
+	const rootRef = useRef<HTMLElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	const [scrollTop, setScrollTop] = useState(0);
@@ -34,7 +40,6 @@ export function HexViewer({
 	const [selectionEnd, setSelectionEnd] = useState<number | null>(null);
 	const [isSelecting, setIsSelecting] = useState(false);
 
-	const [buffer, setBuffer] = useState<Uint8Array>(data ?? new Uint8Array(0));
 	const [hexNibble, setHexNibble] = useState<"high" | "low">("high");
 
 	// =============================
@@ -94,12 +99,17 @@ export function HexViewer({
 	// =============================
 
 	useEffect(() => {
-		setBuffer(data?.slice() ?? new Uint8Array(0));
 		setSelectedByte(null);
 		setSelectionStart(null);
 		setSelectionEnd(null);
 		setHexNibble("high");
-	}, [data]);
+	}, [tabId]);
+
+	useEffect(() => {
+		if (isActive) {
+			rootRef.current?.focus();
+		}
+	}, [isActive]);
 
 	useEffect(() => {
 		if (!containerRef.current) return;
@@ -121,13 +131,12 @@ export function HexViewer({
 	}, []);
 
 	// =============================
-	// Keyboard (só quando ativo)
+	// Keyboard
 	// =============================
 
-	useEffect(() => {
-		if (!isActive) return;
-
-		function handleKeyDown(e: KeyboardEvent) {
+	const handleKeyDown = useCallback(
+		(e: KeyboardEvent) => {
+			// Ctrl / Cmd
 			if (e.ctrlKey || e.metaKey) {
 				switch (e.key.toLowerCase()) {
 					case "c":
@@ -190,7 +199,7 @@ export function HexViewer({
 				}
 
 				newBuffer[selectedByte] = newByte;
-				setBuffer(newBuffer);
+				updateTabBuffer(tabId, newBuffer);
 				onHasChanged?.(true);
 				return;
 			}
@@ -225,11 +234,16 @@ export function HexViewer({
 			setSelectionStart(newIndex);
 			setSelectionEnd(newIndex);
 			setHexNibble("high");
-		}
-
-		globalThis.addEventListener("keydown", handleKeyDown);
-		return () => globalThis.removeEventListener("keydown", handleKeyDown);
-	}, [isActive, buffer, selectedByte, copySelectionHex, onSaveRequest]);
+		},
+		[
+			buffer,
+			selectedByte,
+			hexNibble,
+			copySelectionHex,
+			onSaveRequest,
+			onHasChanged,
+		],
+	);
 
 	// =============================
 	// Scroll / Virtualization
@@ -303,11 +317,19 @@ export function HexViewer({
 	// =============================
 
 	return (
+		// biome-ignore lint: ééé precisamos disso
 		<section
 			className={`h-full flex flex-col border transition-colors ${
 				isActive ? "border-primary ring-1 ring-primary/40" : "border-border"
 			}`}
-			onPointerDown={onActivate}
+			ref={rootRef}
+			onPointerDown={(e) => {
+				onActivate?.();
+				e.currentTarget.focus();
+			}}
+			// biome-ignore lint: ééé precisamos disso
+			tabIndex={0}
+			onKeyDown={handleKeyDown}
 		>
 			<div className="bg-muted border-b border-border px-4 py-2 flex gap-4 font-mono text-xs">
 				<div className="w-20">Offset</div>

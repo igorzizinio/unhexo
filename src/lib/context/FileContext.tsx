@@ -9,6 +9,7 @@ export interface Tab {
 	filePath: string | null;
 	data: Uint8Array;
 	hasChanged: boolean;
+	buffer?: Uint8Array;
 }
 
 export interface PersistedTab {
@@ -31,6 +32,7 @@ interface FileContextType {
 	setActiveTab: (id: string) => void;
 	markAsChanged: (id: string, hasChanged: boolean) => void;
 	saveTab: (id: string, data: Uint8Array) => Promise<void>;
+	updateTabBuffer: (id: string, data: Uint8Array) => void;
 }
 
 const FileContext = createContext<FileContextType | null>(null);
@@ -64,6 +66,7 @@ export function FileProvider({
 				filePath,
 				data,
 				hasChanged: false,
+				buffer: data,
 			};
 			setTabs((prev) => [...prev, newTab]);
 			setActiveTabId(newTab.id);
@@ -86,6 +89,12 @@ export function FileProvider({
 		}
 	};
 
+	const updateTabBuffer = (id: string, data: Uint8Array) => {
+		setTabs((prev) =>
+			prev.map((tab) => (tab.id === id ? { ...tab, buffer: data } : tab)),
+		);
+	};
+
 	const saveTab = async (id: string, data: Uint8Array) => {
 		const tab = tabs.find((t) => t.id === id);
 		if (!tab) return;
@@ -94,10 +103,13 @@ export function FileProvider({
 
 		if (!path) throw new Error("No file path specified.");
 
+		await writeFile(path + ".bak", tab.data);
 		await writeFile(path, data);
 
 		setTabs((prev) =>
-			prev.map((t) => (t.id === id ? { ...t, data, hasChanged: false } : t)),
+			prev.map((t) =>
+				t.id === id ? { ...t, data, hasChanged: false, buffer: data } : t,
+			),
 		);
 	};
 
@@ -117,6 +129,7 @@ export function FileProvider({
 			setActiveTab: setActiveTabId,
 			markAsChanged,
 			saveTab,
+			updateTabBuffer,
 		}),
 		[tabs, activeTabId, activeTab],
 	);

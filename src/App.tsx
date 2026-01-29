@@ -56,8 +56,11 @@ function AppContent() {
 
 	const diffSet = useMemo(() => {
 		if (!leftTab || !rightTab) return null;
-		return diffBuffers(leftTab.data, rightTab.data);
-	}, [leftTab?.data, rightTab?.data]);
+		return diffBuffers(
+			leftTab.buffer ?? new Uint8Array(0),
+			rightTab.buffer ?? new Uint8Array(0),
+		);
+	}, [leftTab?.buffer, rightTab?.buffer]);
 
 	// =========================
 	// Mosaic / Layout
@@ -152,7 +155,9 @@ function AppContent() {
 			<Titlebar
 				viewMode={viewMode}
 				setViewMode={setViewMode}
-				onSaveRequest={() => alert("Use Ctrl+S / Cmd+S para salvar.")}
+				onSaveRequest={() =>
+					saveTab(activeTabId ?? "", activeTab?.buffer ?? new Uint8Array(0))
+				}
 			/>
 
 			<Tabs
@@ -165,7 +170,8 @@ function AppContent() {
 			<main className="flex-1 overflow-hidden">
 				{viewMode === "tabs" && activeTab && (
 					<HexViewer
-						data={activeTab.data}
+						tabId={activeTab.id}
+						buffer={activeTab.buffer ?? new Uint8Array(0)}
 						diffSet={null}
 						isActive
 						onActivate={() => setActiveTab(activeTab.id)}
@@ -194,7 +200,8 @@ function AppContent() {
 
 							return (
 								<HexViewer
-									data={tab?.data || null}
+									tabId={tab?.id || ""}
+									buffer={tab?.buffer ?? new Uint8Array(0)}
 									diffSet={isComparable ? diffSet : null}
 									isActive={tab?.id === activeTabId}
 									onActivate={() => tab && setActiveTab(tab.id)}
