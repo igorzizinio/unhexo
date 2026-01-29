@@ -11,7 +11,6 @@ interface HexViewerProps {
 	onActivate?: () => void;
 	diffSet?: Set<number> | null;
 	onHasChanged?: (hasChanged: boolean) => void;
-	onSaveRequest?: (data: Uint8Array) => Promise<void>;
 }
 
 const ROW_HEIGHT = 24;
@@ -24,7 +23,6 @@ export function HexViewer({
 	isActive = false,
 	onActivate,
 	onHasChanged,
-	onSaveRequest,
 	diffSet,
 }: Readonly<HexViewerProps>) {
 	const { updateTabBuffer } = useFiles();
@@ -143,10 +141,6 @@ export function HexViewer({
 						e.preventDefault();
 						e.shiftKey ? copySelectionAscii() : copySelectionHex();
 						return;
-					case "s":
-						e.preventDefault();
-						onSaveRequest?.(buffer);
-						return;
 					case "a":
 						e.preventDefault();
 						setSelectionStart(0);
@@ -235,14 +229,7 @@ export function HexViewer({
 			setSelectionEnd(newIndex);
 			setHexNibble("high");
 		},
-		[
-			buffer,
-			selectedByte,
-			hexNibble,
-			copySelectionHex,
-			onSaveRequest,
-			onHasChanged,
-		],
+		[buffer, selectedByte, hexNibble, copySelectionHex, onHasChanged],
 	);
 
 	// =============================

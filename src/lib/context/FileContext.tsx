@@ -103,7 +103,8 @@ export function FileProvider({
 
 		if (!path) throw new Error("No file path specified.");
 
-		await writeFile(path + ".bak", tab.data);
+		console.log("Saving to", path);
+
 		await writeFile(path, data);
 
 		setTabs((prev) =>

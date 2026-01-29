@@ -127,24 +127,36 @@ function AppContent() {
 	}
 
 	// =========================
-	// Ctrl + Tab
+	// Global keys
 	// =========================
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
-			if ((e.ctrlKey || e.metaKey) && e.key === "Tab") {
-				e.preventDefault();
-				if (!tabs.length) return;
+			if (e.ctrlKey || e.metaKey) {
+				switch (e.key.toLowerCase()) {
+					case "tab": {
+						e.preventDefault();
+						if (!tabs.length) return;
 
-				const idx = tabs.findIndex((t) => t.id === activeTabId);
-				const next = (idx + 1) % tabs.length;
-				setActiveTab(tabs[next].id);
+						const idx = tabs.findIndex((t) => t.id === activeTabId);
+						const next = (idx + 1) % tabs.length;
+						setActiveTab(tabs[next].id);
+						break;
+					}
+
+					case "s": {
+						e.preventDefault();
+						if (!activeTab) return;
+						handleSaveRequest(activeTab.buffer ?? new Uint8Array(0));
+						break;
+					}
+				}
 			}
 		};
 
 		globalThis.addEventListener("keydown", handleKeyDown);
 		return () => globalThis.removeEventListener("keydown", handleKeyDown);
-	}, [tabs, activeTabId]);
+	}, [tabs, activeTabId, activeTab]);
 
 	// =========================
 	// Render
@@ -176,7 +188,6 @@ function AppContent() {
 						isActive
 						onActivate={() => setActiveTab(activeTab.id)}
 						onHasChanged={(c) => markAsChanged(activeTab.id, c)}
-						onSaveRequest={handleSaveRequest}
 					/>
 				)}
 
@@ -208,7 +219,6 @@ function AppContent() {
 									onHasChanged={(c) => {
 										if (tab) markAsChanged(tab.id, c);
 									}}
-									onSaveRequest={handleSaveRequest}
 								/>
 							);
 						}}
