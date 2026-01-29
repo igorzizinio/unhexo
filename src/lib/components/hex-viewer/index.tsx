@@ -132,7 +132,7 @@ export function HexViewer({
 				switch (e.key.toLowerCase()) {
 					case "c":
 						e.preventDefault();
-						copySelectionHex();
+						e.shiftKey ? copySelectionAscii() : copySelectionHex();
 						return;
 					case "s":
 						e.preventDefault();
@@ -143,6 +143,13 @@ export function HexViewer({
 						setSelectionStart(0);
 						setSelectionEnd(buffer.length - 1);
 						return;
+				}
+			}
+
+			if (e.altKey) {
+				if (e.key === "Insert") {
+					e.preventDefault();
+					copyOffset();
 				}
 			}
 
@@ -344,17 +351,41 @@ export function HexViewer({
 
 				<ContextMenu.Portal>
 					<ContextMenu.Positioner side="bottom" align="start">
-						<ContextMenu.Popup className="bg-popover border rounded-md shadow-md py-1">
-							<ContextMenu.Item onClick={copyOffset}>
-								Copy Offset
+						<ContextMenu.Popup className="flex flex-col text-sm bg-popover border rounded-md shadow-md p-2 text-foreground">
+							<ContextMenu.Item
+								onClick={copyOffset}
+								className={
+									"flex p-2 items-center justify-between gap-4 cursor-pointer hover:bg-accent rounded-md"
+								}
+							>
+								<span>Copy Offset</span>
+								<span className={"text-xs text-muted-foreground"}>
+									(ALT + Insert)
+								</span>
 							</ContextMenu.Item>
 							{selectionStart !== selectionEnd && (
 								<>
-									<ContextMenu.Item onClick={copySelectionHex}>
-										Copy as Hex
+									<ContextMenu.Item
+										className={
+											"flex p-2 items-center justify-between gap-4 cursor-pointer hover:bg-accent rounded-md"
+										}
+										onClick={copySelectionHex}
+									>
+										<span>Copy as Hex</span>
+										<span className={"text-xs text-muted-foreground"}>
+											(CTRL + C)
+										</span>
 									</ContextMenu.Item>
-									<ContextMenu.Item onClick={copySelectionAscii}>
-										Copy as ASCII
+									<ContextMenu.Item
+										onClick={copySelectionAscii}
+										className={
+											"flex p-2 items-center justify-between gap-4 cursor-pointer hover:bg-accent rounded-md"
+										}
+									>
+										<span>Copy as ASCII</span>
+										<span className={"text-xs text-muted-foreground"}>
+											(CTRL + Shift + C)
+										</span>
 									</ContextMenu.Item>
 								</>
 							)}

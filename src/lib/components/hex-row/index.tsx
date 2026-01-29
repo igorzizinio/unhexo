@@ -22,9 +22,9 @@ export default function HexRow({
 	return (
 		<div
 			style={{ top: offsetTop }}
-			className="absolute left-0 right-0 h-6 flex gap-4 px-4 font-mono text-xs"
+			className="absolute left-0 right-0 h-6 flex gap-4 px-4 font-mono text-xs hover:bg-accent/80"
 		>
-			<div className="w-20 text-muted-foreground select-none">
+			<div className="flex w-20 text-muted-foreground select-none items-center">
 				{offset.toString(16).padStart(8, "0").toUpperCase()}
 			</div>
 

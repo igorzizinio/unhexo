@@ -118,21 +118,6 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 
 					<Menu.Root>
 						<Menu.Trigger className="h-8 rounded px-3 text-sm select-none text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-							Analyze
-						</Menu.Trigger>
-						<Menu.Portal>
-							<Menu.Positioner className="outline-none" sideOffset={6}>
-								<Menu.Popup className="origin-[var(--transform-origin)] rounded-md bg-popover text-popover-foreground py-1 shadow-lg border border-border data-[ending-style]:opacity-0 data-[ending-style]:transition-opacity data-[instant]:transition-none">
-									<Menu.Item className="flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors rounded-sm mx-1">
-										Compare files
-									</Menu.Item>
-								</Menu.Popup>
-							</Menu.Positioner>
-						</Menu.Portal>
-					</Menu.Root>
-
-					<Menu.Root>
-						<Menu.Trigger className="h-8 rounded px-3 text-sm select-none text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
 							View
 						</Menu.Trigger>
 						<Menu.Portal>
@@ -163,6 +148,9 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 											</Menu.Positioner>
 										</Menu.Portal>
 									</Menu.SubmenuRoot>
+									<Menu.Item className="flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors rounded-sm mx-1">
+										About
+									</Menu.Item>
 								</Menu.Popup>
 							</Menu.Positioner>
 						</Menu.Portal>
@@ -194,7 +182,7 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 					</Button>
 					<Button
 						onClick={closeApp}
-						class="h-8 w-8 flex items-center justify-center text-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors rounded"
+						class="h-8 w-8 flex items-center justify-center text-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors rounded rounded-tr-none"
 					>
 						<XIcon size={16} />
 					</Button>

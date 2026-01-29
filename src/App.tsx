@@ -186,6 +186,7 @@ function AppContent() {
 							const tab = tabs.find((t) => t.id === win.activeTabId) ?? null;
 
 							const isComparable =
+								tabs.length === 2 &&
 								tab &&
 								leftTab &&
 								rightTab &&
