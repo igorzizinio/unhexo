@@ -6,6 +6,7 @@ interface HexViewerProps {
 	data: Uint8Array | null;
 	isActive?: boolean;
 	onActivate?: () => void;
+	diffSet?: Set<number> | null;
 	onHasChanged?: (hasChanged: boolean) => void;
 	onSaveRequest?: (data: Uint8Array) => Promise<void>;
 }
@@ -20,6 +21,7 @@ export function HexViewer({
 	onActivate,
 	onHasChanged,
 	onSaveRequest,
+	diffSet,
 }: Readonly<HexViewerProps>) {
 	const containerRef = useRef<HTMLDivElement>(null);
 
@@ -217,8 +219,8 @@ export function HexViewer({
 			setHexNibble("high");
 		}
 
-		window.addEventListener("keydown", handleKeyDown);
-		return () => window.removeEventListener("keydown", handleKeyDown);
+		globalThis.addEventListener("keydown", handleKeyDown);
+		return () => globalThis.removeEventListener("keydown", handleKeyDown);
 	}, [isActive, buffer, selectedByte, copySelectionHex, onSaveRequest]);
 
 	// =============================
@@ -331,6 +333,7 @@ export function HexViewer({
 									isByteSelected={isByteSelected}
 									onByteMouseDown={handleByteMouseDown}
 									onByteMouseEnter={handleByteMouseEnter}
+									diffSet={diffSet}
 								/>
 							))}
 						</div>
@@ -372,14 +375,16 @@ function HexRow({
 	isByteSelected,
 	onByteMouseDown,
 	onByteMouseEnter,
-}: {
+	diffSet,
+}: Readonly<{
 	index: number;
 	data: Uint8Array;
 	offsetTop: number;
 	isByteSelected: (i: number) => boolean;
 	onByteMouseDown: (i: number) => void;
 	onByteMouseEnter: (i: number) => void;
-}) {
+	diffSet?: Set<number> | null;
+}>) {
 	const offset = index * BYTES_PER_ROW;
 
 	return (
@@ -411,10 +416,41 @@ function HexRow({
 								isByteSelected(idx)
 									? "bg-primary text-primary-foreground"
 									: "hover:bg-accent"
-							}`}
+							} ${diffSet?.has(idx) ? "bg-highlight" : ""}`}
 						>
 							{data[idx].toString(16).padStart(2, "0").toUpperCase()}
 						</button>
+					);
+				})}
+			</div>
+
+			<div className="flex flex-1 items-center pl-2 select-none">
+				{Array.from({ length: BYTES_PER_ROW }, (_, i) => {
+					const idx = offset + i;
+					if (idx >= data.length) return <span key={i} />;
+
+					const byte = data[idx];
+					const char =
+						byte >= 32 && byte <= 126 ? String.fromCodePoint(byte) : ".";
+
+					return (
+						<span
+							key={i}
+							tabIndex={-1}
+							onPointerDown={(e) => {
+								if (e.button !== 0) return; // Ignorar botões que não sejam o esquerdo
+								e.preventDefault();
+								onByteMouseDown(idx);
+							}}
+							onPointerEnter={(e) => e.buttons === 1 && onByteMouseEnter(idx)}
+							className={`text-center text-muted-foreground ${
+								isByteSelected(idx)
+									? "bg-primary text-primary-foreground"
+									: "hover:bg-accent"
+							} ${diffSet?.has(idx) ? "bg-highlight" : ""} inline-block w-4`}
+						>
+							{char}
+						</span>
 					);
 				})}
 			</div>

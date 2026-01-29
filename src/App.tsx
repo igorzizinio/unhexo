@@ -1,6 +1,7 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import { Mosaic, type MosaicNode } from "react-mosaic-component";
 import "react-mosaic-component/react-mosaic-component.css";
+
 import { HexViewer } from "./lib/components/hex-viewer";
 import StatusBar from "./lib/components/status-bar";
 import { Tabs } from "./lib/components/tabs";
@@ -14,6 +15,21 @@ interface EditorWindow {
 
 export type ViewMode = "tabs" | "mosaic";
 
+function diffBuffers(a: Uint8Array, b: Uint8Array): Set<number> {
+	const diffs = new Set<number>();
+	const len = Math.min(a.length, b.length);
+
+	for (let i = 0; i < len; i++) {
+		if (a[i] !== b[i]) diffs.add(i);
+	}
+
+	for (let i = len; i < Math.max(a.length, b.length); i++) {
+		diffs.add(i);
+	}
+
+	return diffs;
+}
+
 function AppContent() {
 	const {
 		tabs,
@@ -25,49 +41,65 @@ function AppContent() {
 		markAsChanged,
 	} = useFiles();
 
-	const [viewMode, setViewMode] = useState<ViewMode>("tabs"); // default: tabs
+	const [viewMode, setViewMode] = useState<ViewMode>("tabs");
 	const [windows, setWindows] = useState<Record<string, EditorWindow>>({});
 	const [mosaicValue, setMosaicValue] = useState<
 		MosaicNode<string> | string | null
 	>(null);
 
-	// Atualiza Mosaic automaticamente quando o viewMode ou as abas mudam
+	// =========================
+	// Comparação (somente 2 abas)
+	// =========================
+
+	const leftTab = tabs[0] ?? null;
+	const rightTab = tabs[1] ?? null;
+
+	const diffSet = useMemo(() => {
+		if (!leftTab || !rightTab) return null;
+		return diffBuffers(leftTab.data, rightTab.data);
+	}, [leftTab?.data, rightTab?.data]);
+
+	// =========================
+	// Mosaic / Layout
+	// =========================
+
 	useEffect(() => {
 		if (viewMode === "tabs") {
-			// Só mostra o painel ativo
-			const firstPanelId = activeTabId ? `panel-${activeTabId}` : null;
-			if (firstPanelId) {
-				setWindows({
-					[firstPanelId]: { id: firstPanelId, activeTabId: activeTabId },
-				});
-				setMosaicValue(firstPanelId);
-			} else {
+			if (!activeTabId) {
 				setWindows({});
 				setMosaicValue(null);
+				return;
 			}
-		} else if (viewMode === "mosaic") {
-			// Cria um painel para cada aba aberta
+
+			const panelId = `panel-${activeTabId}`;
+			setWindows({
+				[panelId]: { id: panelId, activeTabId },
+			});
+			setMosaicValue(panelId);
+		}
+
+		if (viewMode === "mosaic") {
 			const newWindows: Record<string, EditorWindow> = {};
 			const panels = tabs.map((t) => {
-				const panelId = `panel-${t.id}`;
-				newWindows[panelId] = { id: panelId, activeTabId: t.id };
-				return panelId;
+				const id = `panel-${t.id}`;
+				newWindows[id] = { id, activeTabId: t.id };
+				return id;
 			});
+
 			setWindows(newWindows);
 
-			// Cria árvore simples horizontal com todos os painéis
 			if (panels.length === 0) {
 				setMosaicValue(null);
 			} else if (panels.length === 1) {
 				setMosaicValue(panels[0]);
 			} else {
-				// Cria split em árvore horizontal
 				let node: MosaicNode<string> = {
 					direction: "row",
 					first: panels[0],
 					second: panels[1],
 					splitPercentage: 50,
 				};
+
 				for (let i = 2; i < panels.length; i++) {
 					node = {
 						direction: "row",
@@ -76,49 +108,53 @@ function AppContent() {
 						splitPercentage: 50,
 					};
 				}
+
 				setMosaicValue(node);
 			}
 		}
 	}, [viewMode, tabs, activeTabId]);
 
-	// Salvar arquivo
+	// =========================
+	// Save
+	// =========================
+
 	async function handleSaveRequest(data: Uint8Array) {
-		if (activeTab) {
-			await saveTab(activeTab.id, data);
-			console.log(`File "${activeTab.fileName}" saved successfully!`);
-		}
+		if (!activeTab) return;
+		await saveTab(activeTab.id, data);
 	}
+
+	// =========================
+	// Ctrl + Tab
+	// =========================
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.ctrlKey || e.metaKey) {
-				if (e.key === "Tab") {
-					e.preventDefault();
-					// Alternar para a próxima aba
-					if (tabs.length > 0) {
-						const currentIndex = tabs.findIndex(
-							(tab) => tab.id === activeTabId,
-						);
-						const nextIndex = (currentIndex + 1) % tabs.length;
-						setActiveTab(tabs[nextIndex].id);
-					}
-				}
+			if ((e.ctrlKey || e.metaKey) && e.key === "Tab") {
+				e.preventDefault();
+				if (!tabs.length) return;
+
+				const idx = tabs.findIndex((t) => t.id === activeTabId);
+				const next = (idx + 1) % tabs.length;
+				setActiveTab(tabs[next].id);
 			}
 		};
 
 		globalThis.addEventListener("keydown", handleKeyDown);
 		return () => globalThis.removeEventListener("keydown", handleKeyDown);
-	}, [tabs, activeTabId, setActiveTab]);
+	}, [tabs, activeTabId]);
+
+	// =========================
+	// Render
+	// =========================
 
 	return (
-		<div className="root h-screen flex flex-col overflow-hidden bg-background text-foreground">
+		<div className="h-screen flex flex-col overflow-hidden bg-background text-foreground">
 			<Titlebar
 				viewMode={viewMode}
 				setViewMode={setViewMode}
-				onSaveRequest={() =>
-					alert("Not implemented, use Ctrl+S / Cmd+S to save the file.")
-				}
+				onSaveRequest={() => alert("Use Ctrl+S / Cmd+S para salvar.")}
 			/>
+
 			<Tabs
 				tabs={tabs}
 				activeTabId={activeTabId}
@@ -130,11 +166,10 @@ function AppContent() {
 				{viewMode === "tabs" && activeTab && (
 					<HexViewer
 						data={activeTab.data}
+						diffSet={null}
 						isActive
 						onActivate={() => setActiveTab(activeTab.id)}
-						onHasChanged={(hasChanged) =>
-							markAsChanged(activeTab.id, hasChanged)
-						}
+						onHasChanged={(c) => markAsChanged(activeTab.id, c)}
 						onSaveRequest={handleSaveRequest}
 					/>
 				)}
@@ -145,17 +180,25 @@ function AppContent() {
 						onChange={setMosaicValue}
 						className="bg-background"
 						renderTile={(id) => {
-							const window = windows[id];
-							if (!window) return null;
-							const tab = tabs.find((t) => t.id === window.activeTabId) || null;
+							const win = windows[id];
+							if (!win) return null;
+
+							const tab = tabs.find((t) => t.id === win.activeTabId) ?? null;
+
+							const isComparable =
+								tab &&
+								leftTab &&
+								rightTab &&
+								(tab.id === leftTab.id || tab.id === rightTab.id);
 
 							return (
 								<HexViewer
 									data={tab?.data || null}
+									diffSet={isComparable ? diffSet : null}
 									isActive={tab?.id === activeTabId}
 									onActivate={() => tab && setActiveTab(tab.id)}
-									onHasChanged={(hasChanged) => {
-										if (tab) markAsChanged(tab.id, hasChanged);
+									onHasChanged={(c) => {
+										if (tab) markAsChanged(tab.id, c);
 									}}
 									onSaveRequest={handleSaveRequest}
 								/>
@@ -165,17 +208,15 @@ function AppContent() {
 				)}
 			</main>
 
-			<StatusBar hasChanged={activeTab?.hasChanged || false} />
+			<StatusBar hasChanged={activeTab?.hasChanged ?? false} />
 		</div>
 	);
 }
 
-function App() {
+export default function App() {
 	return (
 		<FileProvider>
 			<AppContent />
 		</FileProvider>
 	);
 }
-
-export default App;
