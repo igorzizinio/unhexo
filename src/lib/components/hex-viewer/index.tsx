@@ -166,8 +166,54 @@ export function HexViewer({
 
 			if (selectedByte === null) return;
 
-			const key = e.key.toUpperCase();
+			let newIndex = selectedByte;
 
+			switch (e.key) {
+				case "F6": {
+					e.preventDefault();
+
+					if (e.shiftKey) {
+						const prevDiffIndex = Array.from(diffSet || new Set<number>())
+							.filter((i) => i < selectedByte)
+							.sort((a, b) => b - a)[0];
+						if (prevDiffIndex !== undefined) {
+							newIndex = prevDiffIndex;
+						}
+						break;
+					}
+
+					const nextDiffIndex = Array.from(diffSet || new Set<number>())
+						.filter((i) => i > selectedByte)
+						.sort((a, b) => a - b)[0];
+					if (nextDiffIndex !== undefined) {
+						newIndex = nextDiffIndex;
+					}
+					break;
+				}
+
+				case "ArrowRight":
+					newIndex = Math.min(selectedByte + 1, buffer.length - 1);
+					break;
+				case "ArrowLeft":
+					newIndex = Math.max(selectedByte - 1, 0);
+					break;
+				case "ArrowDown":
+					newIndex = Math.min(selectedByte + BYTES_PER_ROW, buffer.length - 1);
+					break;
+				case "ArrowUp":
+					newIndex = Math.max(selectedByte - BYTES_PER_ROW, 0);
+					break;
+				case "Home":
+					newIndex = 0;
+					break;
+				case "End":
+					newIndex = buffer.length - 1;
+					break;
+				default:
+					return;
+			}
+
+			const key = e.key.toUpperCase();
 			if (/^[0-9A-F]$/.test(key)) {
 				e.preventDefault();
 
@@ -198,38 +244,13 @@ export function HexViewer({
 				return;
 			}
 
-			let newIndex = selectedByte;
-
-			switch (e.key) {
-				case "ArrowRight":
-					newIndex = Math.min(selectedByte + 1, buffer.length - 1);
-					break;
-				case "ArrowLeft":
-					newIndex = Math.max(selectedByte - 1, 0);
-					break;
-				case "ArrowDown":
-					newIndex = Math.min(selectedByte + BYTES_PER_ROW, buffer.length - 1);
-					break;
-				case "ArrowUp":
-					newIndex = Math.max(selectedByte - BYTES_PER_ROW, 0);
-					break;
-				case "Home":
-					newIndex = 0;
-					break;
-				case "End":
-					newIndex = buffer.length - 1;
-					break;
-				default:
-					return;
-			}
-
 			e.preventDefault();
 			setSelectedByte(newIndex);
 			setSelectionStart(newIndex);
 			setSelectionEnd(newIndex);
 			setHexNibble("high");
 		},
-		[buffer, selectedByte, hexNibble, copySelectionHex, onHasChanged],
+		[buffer, selectedByte, hexNibble, copySelectionHex, onHasChanged, diffSet],
 	);
 
 	// =============================
