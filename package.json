@@ -1,8 +1,13 @@
 {
 	"name": "unhexo",
+	"description": "A *modern* simple to use hex file viewer and editor.",
 	"private": true,
 	"version": "0.1.0",
 	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "https://codeberg.org/igorzizinio/unhexo"
+	},
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build",
