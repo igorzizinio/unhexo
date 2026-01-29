@@ -197,7 +197,7 @@ export function HexViewer({
 
 			e.preventDefault();
 
-			const hex = parseInt(e.key, 16);
+			const hex = Number.parseInt(e.key, 16);
 			const newBuffer = buffer.slice();
 			const current = buffer[selectedByte];
 
@@ -272,9 +272,12 @@ export function HexViewer({
 	// =============================
 
 	return (
-		<div
+		<section
 			className="h-full flex flex-col bg-background"
+			// biome-ignore lint: nao existe uma tag apropriada para isso
 			tabIndex={0}
+			role="application"
+			aria-label="Hex Editor"
 			onPointerDown={() => containerRef.current?.focus()}
 			onKeyDown={handleKeyDown}
 		>
@@ -347,7 +350,7 @@ export function HexViewer({
 					</ContextMenu.Positioner>
 				</ContextMenu.Portal>
 			</ContextMenu.Root>
-		</div>
+		</section>
 	);
 }
 

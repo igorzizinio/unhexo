@@ -13,6 +13,8 @@
     "windows": [
       {
         "title": "unhexo",
+        "minWidth": 400,
+        "minHeight": 270,
         "width": 1280,
         "height": 720,
         "decorations": false
