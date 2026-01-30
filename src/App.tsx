@@ -5,28 +5,10 @@ import StatusBar from "./lib/components/status-bar";
 import { Tabs } from "./lib/components/tabs";
 import Titlebar from "./lib/components/titlebar";
 import { FileProvider, useFiles } from "./lib/context/FileContext";
+import { diffBuffers } from "./lib/utils/diffBuffers";
+import type { EditorWindow, ViewMode } from "./types";
 
-interface EditorWindow {
-	id: string;
-	activeTabId: string | null;
-}
-
-export type ViewMode = "tabs" | "mosaic";
-
-function diffBuffers(a: Uint8Array, b: Uint8Array): Set<number> {
-	const diffs = new Set<number>();
-	const len = Math.min(a.length, b.length);
-
-	for (let i = 0; i < len; i++) {
-		if (a[i] !== b[i]) diffs.add(i);
-	}
-
-	for (let i = len; i < Math.max(a.length, b.length); i++) {
-		diffs.add(i);
-	}
-
-	return diffs;
-}
+import "react-mosaic-component/react-mosaic-component.css";
 
 function AppContent() {
 	const {

@@ -1,4 +1,4 @@
-import { Dialog, Field, NumberField } from "@base-ui/react";
+import { Dialog, NumberField } from "@base-ui/react";
 import { Button } from "@base-ui/react/button";
 import { Menu } from "@base-ui/react/menu";
 import { Menubar } from "@base-ui/react/menubar";
@@ -17,12 +17,12 @@ import {
 	XIcon,
 } from "lucide-preact";
 import { useId, useState } from "preact/hooks";
-import type { ViewMode } from "../../../App";
+import type { ViewMode } from "../../../types";
 import { useFiles } from "../../context/FileContext";
 import { useTheme } from "../../hooks/useTheme";
 
 interface TitlebarProps {
-	viewMode: string;
+	viewMode: ViewMode;
 	setViewMode: (mode: ViewMode) => void;
 	onSaveRequest: () => void;
 }
