@@ -236,6 +236,20 @@ export function HexViewer({
 				case "ArrowUp":
 					newIndex = Math.max(selectedByte - BYTES_PER_ROW, 0);
 					break;
+				case "PageDown":
+					newIndex = Math.min(
+						selectedByte +
+							BYTES_PER_ROW * Math.floor(containerHeight / ROW_HEIGHT),
+						buffer.length - 1,
+					);
+					break;
+				case "PageUp":
+					newIndex = Math.max(
+						selectedByte -
+							BYTES_PER_ROW * Math.floor(containerHeight / ROW_HEIGHT),
+						0,
+					);
+					break;
 				case "Home":
 					newIndex = 0;
 					break;
