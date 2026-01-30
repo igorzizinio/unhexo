@@ -11,6 +11,7 @@ interface HexViewerProps {
 	onActivate?: () => void;
 	diffSet?: Set<number> | null;
 	onHasChanged?: (hasChanged: boolean) => void;
+	className?: string;
 }
 
 const ROW_HEIGHT = 24;
@@ -24,6 +25,7 @@ export function HexViewer({
 	onActivate,
 	onHasChanged,
 	diffSet,
+	className,
 }: Readonly<HexViewerProps>) {
 	const { updateTabBuffer } = useFiles();
 
@@ -327,9 +329,9 @@ export function HexViewer({
 	return (
 		// biome-ignore lint: ééé precisamos disso
 		<section
-			className={`h-full flex flex-col border transition-colors ${
+			className={`h-full flex flex-col border-2 transition-colors rounded ${
 				isActive ? "border-primary ring-1 ring-primary/40" : "border-border"
-			}`}
+			} ${className ?? ""}`}
 			ref={rootRef}
 			onPointerDown={(e) => {
 				onActivate?.();

@@ -179,7 +179,9 @@ function AppContent() {
 				onTabClose={closeTab}
 			/>
 
-			<main className="flex-1 overflow-hidden">
+			<main
+				className={`flex-1 overflow-hidden ${viewMode === "tabs" ? "p-1.5" : ""}`}
+			>
 				{viewMode === "tabs" && activeTab && (
 					<HexViewer
 						tabId={activeTab.id}
