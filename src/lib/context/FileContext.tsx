@@ -23,11 +23,7 @@ interface FileContextType {
 	tabs: Tab[];
 	activeTabId: string | null;
 	activeTab: Tab | null;
-	openFile: (
-		filePath: string | null,
-		fileName: string,
-		data: Uint8Array,
-	) => void;
+	openFile: (file: Partial<Tab>) => void;
 	closeTab: (id: string) => void;
 	setActiveTab: (id: string) => void;
 	markAsChanged: (id: string, hasChanged: boolean) => void;
@@ -50,11 +46,7 @@ export function FileProvider({
 		[tabs, activeTabId],
 	);
 
-	const openFile = (
-		filePath: string | null,
-		fileName: string,
-		data: Uint8Array,
-	) => {
+	const openFile = ({ filePath, fileName, data, hasChanged }: Partial<Tab>) => {
 		const existing = tabs.find((tab) => tab.filePath === filePath);
 
 		if (existing) {
@@ -62,11 +54,11 @@ export function FileProvider({
 		} else {
 			const newTab: Tab = {
 				id: crypto.randomUUID(),
-				fileName,
-				filePath,
-				data,
-				hasChanged: false,
-				buffer: data,
+				fileName: fileName ?? "Untitled",
+				filePath: filePath ?? null,
+				data: data ?? new Uint8Array(0),
+				hasChanged: hasChanged ?? false,
+				buffer: data ?? new Uint8Array(0),
 			};
 			setTabs((prev) => [...prev, newTab]);
 			setActiveTabId(newTab.id);
@@ -99,7 +91,11 @@ export function FileProvider({
 		const tab = tabs.find((t) => t.id === id);
 		if (!tab) return;
 
-		const path = tab.filePath ?? (await save());
+		const path =
+			tab.filePath ??
+			(await save({
+				defaultPath: tab.fileName,
+			}));
 
 		if (!path) throw new Error("No file path specified.");
 

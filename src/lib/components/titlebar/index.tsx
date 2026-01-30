@@ -48,7 +48,11 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 				for (const filePath of selected) {
 					const data = await readFile(filePath);
 					const fileName = filePath.split(/[\\/]/).pop() || "Unknown";
-					addFile(filePath, fileName, new Uint8Array(data));
+					addFile({
+						filePath,
+						fileName,
+						data: new Uint8Array(data),
+					});
 				}
 			} catch (error) {
 				console.error("Failed to read file:", error);
@@ -69,7 +73,7 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 		const buffer = new Uint8Array(size);
 		const fileName = `untitled-${Date.now()}`;
 
-		addFile(null, fileName, buffer);
+		addFile({ fileName, data: buffer, hasChanged: true });
 		setNewFileOpen(false);
 	};
 
