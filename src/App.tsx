@@ -8,6 +8,7 @@ import { FileProvider, useFiles } from "./lib/context/FileContext";
 import { diffBuffers } from "./lib/utils/diffBuffers";
 import type { EditorWindow, ViewMode } from "./types";
 
+//! DO NO REMOVE: this is necessary for the mosaic works
 import "react-mosaic-component/react-mosaic-component.css";
 
 function AppContent() {
