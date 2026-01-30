@@ -1,4 +1,4 @@
-import { Dialog, Field } from "@base-ui/react";
+import { Dialog, Field, NumberField } from "@base-ui/react";
 import { Button } from "@base-ui/react/button";
 import { Menu } from "@base-ui/react/menu";
 import { Menubar } from "@base-ui/react/menubar";
@@ -11,10 +11,12 @@ import {
 	MaximizeIcon,
 	MinusIcon,
 	MoonIcon,
+	MoveHorizontalIcon,
+	PlusIcon,
 	SunIcon,
 	XIcon,
 } from "lucide-preact";
-import { useState } from "preact/hooks";
+import { useId, useState } from "preact/hooks";
 import type { ViewMode } from "../../../App";
 import { useFiles } from "../../context/FileContext";
 import { useTheme } from "../../hooks/useTheme";
@@ -29,6 +31,8 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 	const appWindow = getCurrentWindow();
 	const { theme, toggleTheme } = useTheme();
 	const { openFile: addFile } = useFiles();
+
+	const newFileSizeId = useId();
 
 	const [newFileOpen, setNewFileOpen] = useState(false);
 
@@ -214,7 +218,7 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 				</div>
 
 				<Dialog.Portal>
-					<Dialog.Backdrop className="fixed inset-0 bg-black/20 backdrop-blur-sm transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+					<Dialog.Backdrop className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
 
 					<Dialog.Popup
 						className="
@@ -241,27 +245,43 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 						</Dialog.Description>
 
 						<form onSubmit={createNewFile} className="mt-4 flex flex-col gap-4">
-							<Field.Root class="flex flex-col gap-2">
-								<Field.Label className="text-sm font-medium">
-									File Size (bytes)
-								</Field.Label>
-								<Field.Control
-									name="size"
-									type="number"
-									defaultValue={1024}
-									min={1}
-									placeholder="1024"
-									className="
-										h-9 rounded-md
+							<NumberField.Root
+								class="flex flex-col gap-2"
+								min={1}
+								name="size"
+								defaultValue={2048}
+							>
+								<NumberField.ScrubArea className="cursor-ew-resize">
+									<label
+										htmlFor={newFileSizeId}
+										className="text-sm font-medium"
+									>
+										File Size (bytes)
+									</label>
+									<NumberField.ScrubAreaCursor className="drop-shadow-[0_1px_1px_#0008] filter">
+										<MoveHorizontalIcon className="text-foreground" />
+									</NumberField.ScrubAreaCursor>
+								</NumberField.ScrubArea>
+
+								<NumberField.Group className="flex">
+									<NumberField.Decrement className="h-9 border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded-l-md hover:bg-accent hover:text-accent-foreground transition-colors">
+										<MinusIcon />
+									</NumberField.Decrement>
+									<NumberField.Input
+										id={newFileSizeId}
+										className="h-9
 										border border-border
 										bg-background
 										px-3 text-sm
 										text-foreground
 										focus:outline-none
-										focus:ring-2 focus:ring-ring
-									"
-								/>
-							</Field.Root>
+										focus:ring-2 focus:ring-ring"
+									/>
+									<NumberField.Increment className="h-9 border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded-r-md hover:bg-accent hover:text-accent-foreground transition-colors">
+										<PlusIcon />
+									</NumberField.Increment>
+								</NumberField.Group>
+							</NumberField.Root>
 
 							<div className="mt-6 flex justify-end gap-2">
 								<Dialog.Close

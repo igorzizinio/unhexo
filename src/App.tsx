@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
 import { Mosaic, type MosaicNode } from "react-mosaic-component";
-import "react-mosaic-component/react-mosaic-component.css";
-
 import { HexViewer } from "./lib/components/hex-viewer";
 import StatusBar from "./lib/components/status-bar";
 import { Tabs } from "./lib/components/tabs";
