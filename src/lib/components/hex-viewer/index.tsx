@@ -168,6 +168,37 @@ export function HexViewer({
 
 			if (selectedByte === null) return;
 
+			const key = e.key.toUpperCase();
+			if (/^[0-9A-F]$/.test(key)) {
+				e.preventDefault();
+
+				const value = Number.parseInt(key, 16);
+				const newBuffer = buffer.slice();
+				const oldByte = newBuffer[selectedByte];
+
+				let newByte: number;
+
+				if (hexNibble === "high") {
+					newByte = (value << 4) | (oldByte & 0x0f);
+					setHexNibble("low");
+				} else {
+					newByte = (oldByte & 0xf0) | value;
+					setHexNibble("high");
+
+					// avança cursor
+					if (selectedByte < newBuffer.length - 1) {
+						setSelectedByte(selectedByte + 1);
+						setSelectionStart(selectedByte + 1);
+						setSelectionEnd(selectedByte + 1);
+					}
+				}
+
+				newBuffer[selectedByte] = newByte;
+				updateTabBuffer(tabId, newBuffer);
+				onHasChanged?.(true);
+				return;
+			}
+
 			let newIndex = selectedByte;
 
 			switch (e.key) {
@@ -213,37 +244,6 @@ export function HexViewer({
 					break;
 				default:
 					return;
-			}
-
-			const key = e.key.toUpperCase();
-			if (/^[0-9A-F]$/.test(key)) {
-				e.preventDefault();
-
-				const value = parseInt(key, 16);
-				const newBuffer = buffer.slice();
-				const oldByte = newBuffer[selectedByte];
-
-				let newByte: number;
-
-				if (hexNibble === "high") {
-					newByte = (value << 4) | (oldByte & 0x0f);
-					setHexNibble("low");
-				} else {
-					newByte = (oldByte & 0xf0) | value;
-					setHexNibble("high");
-
-					// avança cursor
-					if (selectedByte < newBuffer.length - 1) {
-						setSelectedByte(selectedByte + 1);
-						setSelectionStart(selectedByte + 1);
-						setSelectionEnd(selectedByte + 1);
-					}
-				}
-
-				newBuffer[selectedByte] = newByte;
-				updateTabBuffer(tabId, newBuffer);
-				onHasChanged?.(true);
-				return;
 			}
 
 			e.preventDefault();

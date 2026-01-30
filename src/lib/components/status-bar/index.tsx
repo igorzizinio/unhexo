@@ -1,6 +1,6 @@
 import { useFiles } from "../../context/FileContext";
 
-const StatusBar = ({ hasChanged }: { hasChanged: boolean }) => {
+const StatusBar = () => {
 	const { tabs, activeTabId } = useFiles();
 
 	const active = tabs.find((tab) => tab.id === activeTabId);
@@ -11,7 +11,7 @@ const StatusBar = ({ hasChanged }: { hasChanged: boolean }) => {
 				<div>
 					<span className="text-xs">
 						<span>{active?.fileName}</span>
-						<span>{hasChanged ? "*" : ""}</span>
+						<span>{active?.hasChanged ? "*" : ""}</span>
 					</span>
 				</div>
 				<div>

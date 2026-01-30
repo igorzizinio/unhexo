@@ -228,7 +228,7 @@ function AppContent() {
 				)}
 			</main>
 
-			<StatusBar hasChanged={activeTab?.hasChanged ?? false} />
+			<StatusBar />
 		</div>
 	);
 }
