@@ -94,10 +94,21 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 						</Menu.Trigger>
 						<Menu.Portal>
 							<Menu.Positioner className="outline-none" sideOffset={6}>
-								<Menu.Popup className="origin-[var(--transform-origin)] rounded-md bg-popover text-popover-foreground py-1 shadow-lg border border-border data-[ending-style]:opacity-0 data-[ending-style]:transition-opacity data-[instant]:transition-none">
-									<Menu.Item className="flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors rounded-sm mx-1">
-										<Dialog.Trigger>New File</Dialog.Trigger>
-									</Menu.Item>
+								<Menu.Popup
+									className="origin-[var(--transform-origin)] rounded-md bg-popover text-popover-foreground py-1 shadow-lg border border-border data-[ending-style]:opacity-0 data-[ending-style]:transition-opacity data-[instant]:transition-none transition-all duration-200 ease-out"
+									style={{
+										transitionProperty: "opacity, transform",
+									}}
+								>
+									<Dialog.Trigger
+										render={
+											<Menu.Item className="flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors rounded-sm mx-1">
+												New File
+											</Menu.Item>
+										}
+									>
+										New File
+									</Dialog.Trigger>
 
 									<Menu.Item
 										onClick={openFile}
@@ -122,25 +133,35 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 						</Menu.Trigger>
 						<Menu.Portal>
 							<Menu.Positioner className="outline-none" sideOffset={6}>
-								<Menu.Popup className="origin-[var(--transform-origin)] rounded-md bg-popover text-popover-foreground py-1 shadow-lg border border-border data-[ending-style]:opacity-0 data-[ending-style]:transition-opacity data-[instant]:transition-none">
+								<Menu.Popup
+									className="origin-[var(--transform-origin)] rounded-md bg-popover text-popover-foreground py-1 shadow-lg border border-border data-[ending-style]:opacity-0 data-[ending-style]:transition-opacity data-[instant]:transition-none transition-all duration-200 ease-out"
+									style={{
+										transitionProperty: "opacity, transform",
+									}}
+								>
 									<Menu.SubmenuRoot>
-										<Menu.SubmenuTrigger className="flex w-full cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground rounded-sm">
+										<Menu.SubmenuTrigger className="flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors rounded-sm mx-1">
 											Layout
 											<ChevronRightIcon size={14} />
 										</Menu.SubmenuTrigger>
 
 										<Menu.Portal>
 											<Menu.Positioner className="outline-none">
-												<Menu.Popup className="rounded-md bg-popover text-popover-foreground py-1 shadow-lg border border-border">
+												<Menu.Popup
+													className="ml-2.5 rounded-md bg-popover text-popover-foreground py-1 shadow-lg border border-border data-starting-style:opacity-0 data-[ending-style]:opacity-0 data-[ending-style]:transition-opacity data-[instant]:transition-none transition-all duration-200 ease-out"
+													style={{
+														transitionProperty: "opacity, transform",
+													}}
+												>
 													<Menu.Item
 														onClick={() => setViewMode("tabs")}
-														className="flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground rounded-sm"
+														className="flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors rounded-sm mx-1"
 													>
 														Tabs
 													</Menu.Item>
 													<Menu.Item
 														onClick={() => setViewMode("mosaic")}
-														className="flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground rounded-sm"
+														className="flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors rounded-sm mx-1"
 													>
 														Mosaic
 													</Menu.Item>
@@ -189,7 +210,7 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 				</div>
 
 				<Dialog.Portal>
-					<Dialog.Backdrop className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+					<Dialog.Backdrop className="fixed inset-0 bg-black/20 backdrop-blur-sm transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
 
 					<Dialog.Popup
 						className="
@@ -215,9 +236,11 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 							Create a new file to get started.
 						</Dialog.Description>
 
-						<form onSubmit={createNewFile}>
+						<form onSubmit={createNewFile} className="mt-4 flex flex-col gap-4">
 							<Field.Root class="flex flex-col gap-2">
-								<Field.Label>File Size (bytes)</Field.Label>
+								<Field.Label className="text-sm font-medium">
+									File Size (bytes)
+								</Field.Label>
 								<Field.Control
 									name="size"
 									type="number"
