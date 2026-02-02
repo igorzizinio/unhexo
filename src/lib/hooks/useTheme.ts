@@ -1,10 +1,16 @@
 import { useEffect, useState } from "preact/hooks";
 
-export const THEMES = ["light", "dark", "rose-pine", "remofer"] as const;
+export const THEMES = [
+	"light",
+	"dark",
+	"rose-pine",
+	"remofer",
+	"furina",
+] as const;
 
 export type Theme = (typeof THEMES)[number];
 
-const customThemes = new Set(["rose-pine", "remofer"]);
+const customThemes = new Set(["rose-pine", "remofer", "furina"]);
 
 export function useTheme() {
 	const [theme, setTheme] = useState<Theme>(() => {

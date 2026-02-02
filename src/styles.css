@@ -161,6 +161,42 @@
 		--ring: 55% 0.18 24; /* #d63f3f */
 	}
 
+	/* Furina theme */
+	[data-theme="furina"] {
+		--background: 22% 0.08 270;
+		--foreground: 98% 0.01 240;
+
+		--card: 28% 0.095 268;
+		--card-foreground: 98% 0.01 240;
+
+		--popover: 32% 0.11 267;
+		--popover-foreground: 98% 0.01 240;
+
+		--primary: 68% 0.16 245;
+		--primary-foreground: 20% 0.08 270;
+
+		--secondary: 42% 0.17 272;
+		--secondary-foreground: 98% 0.01 240;
+
+		--muted: 36% 0.1 268;
+		--muted-foreground: 85% 0.03 250;
+
+		--accent: 82% 0.14 220;
+		--accent-foreground: 20% 0.08 270;
+
+		--highlight: 82% 0.12 95;
+		--highlight-foreground: 20% 0.08 270;
+
+		--destructive: 65% 0.2 20;
+		--destructive-foreground: 98% 0.01 240;
+
+		--border: 38% 0.11 268;
+		--input: 30% 0.1 269;
+		--ring: 70% 0.16 240;
+	}
+
+
+
 	body {
 		@apply bg-background text-foreground antialiased;
 		scrollbar-color: var(--color-border) var(--color-background);
