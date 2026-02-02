@@ -7,9 +7,10 @@ export interface Tab {
 	id: string;
 	fileName: string;
 	filePath: string | null;
-	data: Uint8Array;
+	fileSize: number;
 	hasChanged: boolean;
-	buffer?: Uint8Array;
+	buffer?: Uint8Array; // Only for modified data
+	isBuffered: boolean; // True if using file handle, false if fully loaded in memory
 }
 
 export interface PersistedTab {
@@ -23,7 +24,7 @@ interface FileContextType {
 	tabs: Tab[];
 	activeTabId: string | null;
 	activeTab: Tab | null;
-	openFile: (file: Partial<Tab>) => void;
+	openFile: (file: Partial<Tab> & { data?: Uint8Array }) => void;
 	closeTab: (id: string) => void;
 	setActiveTab: (id: string) => void;
 	markAsChanged: (id: string, hasChanged: boolean) => void;
@@ -46,7 +47,14 @@ export function FileProvider({
 		[tabs, activeTabId],
 	);
 
-	const openFile = ({ filePath, fileName, data, hasChanged }: Partial<Tab>) => {
+	const openFile = ({
+		filePath,
+		fileName,
+		fileSize,
+		data,
+		hasChanged,
+		isBuffered = true,
+	}: Partial<Tab> & { data?: Uint8Array }) => {
 		const existing = tabs.find((tab) => tab.filePath === filePath);
 
 		if (existing) {
@@ -56,9 +64,10 @@ export function FileProvider({
 				id: crypto.randomUUID(),
 				fileName: fileName ?? "Untitled",
 				filePath: filePath ?? null,
-				data: data ?? new Uint8Array(0),
+				fileSize: fileSize ?? data?.length ?? 0,
 				hasChanged: hasChanged ?? false,
-				buffer: data ?? new Uint8Array(0),
+				buffer: data,
+				isBuffered,
 			};
 			setTabs((prev) => [...prev, newTab]);
 			setActiveTabId(newTab.id);
@@ -83,7 +92,11 @@ export function FileProvider({
 
 	const updateTabBuffer = (id: string, data: Uint8Array) => {
 		setTabs((prev) =>
-			prev.map((tab) => (tab.id === id ? { ...tab, buffer: data } : tab)),
+			prev.map((tab) =>
+				tab.id === id
+					? { ...tab, buffer: data, fileSize: data.length, isBuffered: false }
+					: tab,
+			),
 		);
 	};
 
@@ -105,7 +118,9 @@ export function FileProvider({
 
 		setTabs((prev) =>
 			prev.map((t) =>
-				t.id === id ? { ...t, data, hasChanged: false, buffer: data } : t,
+				t.id === id
+					? { ...t, hasChanged: false, buffer: data, fileSize: data.length }
+					: t,
 			),
 		);
 	};

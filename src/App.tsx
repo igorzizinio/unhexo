@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import type { MosaicNode } from "react-mosaic-component";
 import { Mosaic } from "react-mosaic-component";
 import { HexViewer } from "./lib/components/hex-viewer";
+import { BufferedHexViewer } from "./lib/components/hex-viewer/buffered";
 import StatusBar from "./lib/components/status-bar";
 import { Tabs } from "./lib/components/tabs";
 import Titlebar from "./lib/components/titlebar";
@@ -183,16 +184,28 @@ function AppContent() {
 			<main
 				className={`flex-1 overflow-hidden ${viewMode === "tabs" ? "p-1.5" : ""}`}
 			>
-				{viewMode === "tabs" && activeTab && (
-					<HexViewer
-						tabId={activeTab.id}
-						buffer={activeTab.buffer ?? new Uint8Array(0)}
-						diffSet={null}
-						isActive
-						onActivate={() => setActiveTab(activeTab.id)}
-						onHasChanged={(c) => markAsChanged(activeTab.id, c)}
-					/>
-				)}
+				{viewMode === "tabs" &&
+					activeTab &&
+					(activeTab.isBuffered && activeTab.filePath ? (
+						<BufferedHexViewer
+							tabId={activeTab.id}
+							filePath={activeTab.filePath}
+							fileSize={activeTab.fileSize}
+							diffSet={null}
+							isActive
+							onActivate={() => setActiveTab(activeTab.id)}
+							onHasChanged={(c) => markAsChanged(activeTab.id, c)}
+						/>
+					) : (
+						<HexViewer
+							tabId={activeTab.id}
+							buffer={activeTab.buffer ?? new Uint8Array(0)}
+							diffSet={null}
+							isActive
+							onActivate={() => setActiveTab(activeTab.id)}
+							onHasChanged={(c) => markAsChanged(activeTab.id, c)}
+						/>
+					))}
 
 				{viewMode === "mosaic" && mosaicValue && (
 					<Mosaic
@@ -212,16 +225,26 @@ function AppContent() {
 								rightTab &&
 								(tab.id === leftTab.id || tab.id === rightTab.id);
 
-							return (
-								<HexViewer
-									tabId={tab?.id || ""}
-									buffer={tab?.buffer ?? new Uint8Array(0)}
+							if (!tab) return null;
+
+							return tab.isBuffered && tab.filePath ? (
+								<BufferedHexViewer
+									tabId={tab.id}
+									filePath={tab.filePath}
+									fileSize={tab.fileSize}
 									diffSet={isComparable ? diffSet : null}
-									isActive={tab?.id === activeTabId}
-									onActivate={() => tab && setActiveTab(tab.id)}
-									onHasChanged={(c) => {
-										if (tab) markAsChanged(tab.id, c);
-									}}
+									isActive={tab.id === activeTabId}
+									onActivate={() => setActiveTab(tab.id)}
+									onHasChanged={(c) => markAsChanged(tab.id, c)}
+								/>
+							) : (
+								<HexViewer
+									tabId={tab.id}
+									buffer={tab.buffer ?? new Uint8Array(0)}
+									diffSet={isComparable ? diffSet : null}
+									isActive={tab.id === activeTabId}
+									onActivate={() => setActiveTab(tab.id)}
+									onHasChanged={(c) => markAsChanged(tab.id, c)}
 								/>
 							);
 						}}

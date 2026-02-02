@@ -294,11 +294,9 @@ export function HexViewer({
 		Math.ceil((scrollTop + containerHeight) / ROW_HEIGHT) + OVERSCAN,
 	);
 
-	const handleScroll = useCallback(
-		(e: TargetedUIEvent<HTMLDivElement>) =>
-			setScrollTop(e.currentTarget.scrollTop),
-		[],
-	);
+	const handleScroll = useCallback((e: TargetedUIEvent<HTMLDivElement>) => {
+		setScrollTop(e.currentTarget.scrollTop);
+	}, []);
 
 	// =============================
 	// Mouse

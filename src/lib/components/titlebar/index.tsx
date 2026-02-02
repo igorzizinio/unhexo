@@ -1,8 +1,8 @@
 import { Separator } from "@base-ui/react";
 import { Menubar } from "@base-ui/react/menubar";
+import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
-import { readFile } from "@tauri-apps/plugin-fs";
 import { exit } from "@tauri-apps/plugin-process";
 import { useState } from "preact/hooks";
 import About from "@/lib/components/about";
@@ -45,16 +45,23 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 		if (selected) {
 			try {
 				for (const filePath of selected) {
-					const data = await readFile(filePath);
+					// Open file handle and get file size
+					const info = await invoke<{ size: number }>("open_file_handle", {
+						path: filePath,
+					});
+
 					const fileName = filePath.split(/[\\/]/).pop() || "Unknown";
+
+					// Add file with buffered mode
 					addFile({
 						filePath,
 						fileName,
-						data: new Uint8Array(data),
+						fileSize: info.size,
+						isBuffered: true,
 					});
 				}
 			} catch (error) {
-				console.error("Failed to read file:", error);
+				console.error("Failed to open file:", error);
 			}
 		}
 	};
@@ -63,7 +70,12 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 		const buffer = new Uint8Array(size);
 		const fileName = `untitled-${Date.now()}`;
 
-		addFile({ fileName, data: buffer, hasChanged: true });
+		addFile({
+			fileName,
+			data: buffer,
+			hasChanged: true,
+			isBuffered: false,
+		});
 	};
 
 	const minimizeApp = async () => {

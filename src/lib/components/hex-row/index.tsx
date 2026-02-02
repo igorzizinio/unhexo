@@ -1,6 +1,7 @@
 interface HexRowProps {
 	index: number;
 	data: Uint8Array;
+	dataOffset?: number; // Offset of the data buffer in the file
 	offsetTop: number;
 	isByteSelected: (i: number) => boolean;
 	onByteMouseDown: (i: number) => void;
@@ -12,6 +13,7 @@ interface HexRowProps {
 export default function HexRow({
 	index,
 	data,
+	dataOffset = 0,
 	offsetTop,
 	isByteSelected,
 	onByteMouseDown,
@@ -20,6 +22,7 @@ export default function HexRow({
 	bytesPerRow,
 }: Readonly<HexRowProps>) {
 	const offset = index * bytesPerRow;
+	const dataIndex = offset - dataOffset;
 
 	return (
 		<div
@@ -32,8 +35,10 @@ export default function HexRow({
 
 			<div className="flex select-none">
 				{Array.from({ length: bytesPerRow }, (_, i) => {
-					const idx = offset + i;
-					if (idx >= data.length) return <span key={i} className="w-6" />;
+					const fileIdx = offset + i;
+					const bufferIdx = dataIndex + i;
+					if (bufferIdx < 0 || bufferIdx >= data.length)
+						return <span key={i} className="w-6" />;
 
 					return (
 						<button
@@ -43,18 +48,20 @@ export default function HexRow({
 							onPointerDown={(e) => {
 								if (e.button !== 0) return; // Ignorar botões que não sejam o esquerdo
 								e.preventDefault();
-								onByteMouseDown(idx);
+								onByteMouseDown(fileIdx);
 							}}
-							onPointerEnter={(e) => e.buttons === 1 && onByteMouseEnter(idx)}
+							onPointerEnter={(e) =>
+								e.buttons === 1 && onByteMouseEnter(fileIdx)
+							}
 							className={`w-6 h-6 rounded transition-colors ${
-								isByteSelected(idx)
+								isByteSelected(fileIdx)
 									? "bg-primary text-primary-foreground font-semibold"
-									: diffSet?.has(idx)
+									: diffSet?.has(fileIdx)
 										? "bg-highlight text-highlight-foreground font-bold"
 										: "hover:bg-accent hover:text-accent-foreground"
 							}`}
 						>
-							{data[idx].toString(16).padStart(2, "0").toUpperCase()}
+							{data[bufferIdx].toString(16).padStart(2, "0").toUpperCase()}
 						</button>
 					);
 				})}
@@ -62,10 +69,12 @@ export default function HexRow({
 
 			<div className="flex flex-1 items-center pl-2 select-none">
 				{Array.from({ length: bytesPerRow }, (_, i) => {
-					const idx = offset + i;
-					if (idx >= data.length) return <span key={i} />;
+					const fileIdx = offset + i;
+					const bufferIdx = dataIndex + i;
+					if (bufferIdx < 0 || bufferIdx >= data.length)
+						return <span key={i} />;
 
-					const byte = data[idx];
+					const byte = data[bufferIdx];
 					const char =
 						byte >= 32 && byte <= 126 ? String.fromCodePoint(byte) : ".";
 
@@ -76,13 +85,15 @@ export default function HexRow({
 							onPointerDown={(e) => {
 								if (e.button !== 0) return; // Ignorar botões que não sejam o esquerdo
 								e.preventDefault();
-								onByteMouseDown(idx);
+								onByteMouseDown(fileIdx);
 							}}
-							onPointerEnter={(e) => e.buttons === 1 && onByteMouseEnter(idx)}
+							onPointerEnter={(e) =>
+								e.buttons === 1 && onByteMouseEnter(fileIdx)
+							}
 							className={`text-center inline-block w-4 h-4 rounded ${
-								isByteSelected(idx)
+								isByteSelected(fileIdx)
 									? "bg-primary text-primary-foreground font-semibold"
-									: diffSet?.has(idx)
+									: diffSet?.has(fileIdx)
 										? "bg-highlight text-highlight-foreground font-bold"
 										: "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
 							}`}
