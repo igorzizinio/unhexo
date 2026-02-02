@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import type { MosaicNode } from "react-mosaic-component";
 import { Mosaic } from "react-mosaic-component";
 import { HexViewer } from "./lib/components/hex-viewer";
@@ -11,6 +11,7 @@ import type { EditorWindow, ViewMode } from "./types";
 
 //! DO NO REMOVE: this is necessary for the mosaic works
 import "react-mosaic-component/react-mosaic-component.css";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 
 function AppContent() {
 	const {
@@ -28,6 +29,8 @@ function AppContent() {
 	const [mosaicValue, setMosaicValue] = useState<
 		MosaicNode<string> | string | null
 	>(null);
+
+	const [zoomLevel, setZoomLevel] = useState(1);
 
 	// =========================
 	// Comparação (somente 2 abas)
@@ -108,6 +111,10 @@ function AppContent() {
 		await saveTab(activeTab.id, data);
 	}
 
+	useEffect(() => {
+		getCurrentWebview().setZoom(zoomLevel);
+	}, [zoomLevel]);
+
 	// =========================
 	// Global keys
 	// =========================
@@ -116,6 +123,18 @@ function AppContent() {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.ctrlKey || e.metaKey) {
 				switch (e.key.toLowerCase()) {
+					case "+":
+					case "=": {
+						e.preventDefault();
+						setZoomLevel((prev) => Math.min(prev + 0.1, 3));
+						break;
+					}
+					case "-": {
+						e.preventDefault();
+						setZoomLevel((prev) => Math.max(prev - 0.1, 0.5));
+						break;
+					}
+
 					case "tab": {
 						e.preventDefault();
 						if (!tabs.length) return;

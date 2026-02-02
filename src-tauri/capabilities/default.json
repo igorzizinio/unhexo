@@ -16,6 +16,7 @@
     "fs:allow-read-file",
     "fs:allow-write-file",
     "fs:allow-stat",
-    "store:default"
+    "store:default",
+    "core:webview:allow-set-webview-zoom"
   ]
 }
