@@ -12,6 +12,10 @@
 		"dev": "vite",
 		"build": "tsc && vite build",
 		"preview": "vite preview",
+		"format": "biome format",
+		"check": "biome check",
+		"lint": "biome lint",
+		"ci": "biome ci",
 		"tauri": "tauri"
 	},
 	"dependencies": {
