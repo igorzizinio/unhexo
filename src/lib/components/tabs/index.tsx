@@ -1,6 +1,6 @@
 import { ScrollArea } from "@base-ui/react";
 import { XIcon } from "lucide-preact";
-import type { Tab } from "../../context/FileContext";
+import type { Tab } from "@/lib/context/FileContext";
 
 interface TabsProps {
 	tabs: Tab[];

@@ -184,7 +184,7 @@
 
 	*::-webkit-scrollbar-thumb {
 		@apply bg-border rounded hover:bg-muted-foreground/30;
-	}	
+	}
 
 	/* Better focus rings */
 	button:focus-visible,

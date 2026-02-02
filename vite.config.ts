@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import preact from "@preact/preset-vite";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
@@ -27,6 +28,12 @@ export default defineConfig(async () => ({
 		watch: {
 			// 3. tell Vite to ignore watching `src-tauri`
 			ignored: ["**/src-tauri/**"],
+		},
+	},
+	resolve: {
+		alias: {
+			// 4. Use the src directory as the root for imports
+			"@": resolve(__dirname, "src"),
 		},
 	},
 }));

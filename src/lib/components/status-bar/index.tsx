@@ -1,4 +1,4 @@
-import { useFiles } from "../../context/FileContext";
+import { useFiles } from "@/lib/context/FileContext";
 
 interface StatusBarProps {
 	viewMode: string;

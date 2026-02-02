@@ -5,13 +5,17 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { readFile } from "@tauri-apps/plugin-fs";
 import { exit } from "@tauri-apps/plugin-process";
 import { useState } from "preact/hooks";
-import type { ViewMode } from "../../../types";
-import { useFiles } from "../../context/FileContext";
-import { THEMES, useTheme } from "../../hooks/useTheme";
-import About from "../about";
-import { MenubarItem, MenubarMenu, MenubarSubmenu } from "../ui/menubar-menu";
-import { NewFileDialog } from "../ui/new-file-dialog";
-import { WindowControls } from "../ui/window-controls";
+import About from "@/lib/components/about";
+import {
+	MenubarItem,
+	MenubarMenu,
+	MenubarSubmenu,
+} from "@/lib/components/ui/menubar-menu";
+import { NewFileDialog } from "@/lib/components/ui/new-file-dialog";
+import { WindowControls } from "@/lib/components/ui/window-controls";
+import { useFiles } from "@/lib/context/FileContext";
+import { THEMES, useTheme } from "@/lib/hooks/useTheme";
+import type { ViewMode } from "@/types";
 
 interface TitlebarProps {
 	viewMode: ViewMode;

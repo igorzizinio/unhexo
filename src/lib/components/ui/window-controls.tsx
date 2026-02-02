@@ -6,7 +6,7 @@ import {
 	SunIcon,
 	XIcon,
 } from "lucide-preact";
-import type { Theme } from "../../hooks/useTheme";
+import type { Theme } from "@/lib/hooks/useTheme";
 
 const BUTTON_ICON_CLASS =
 	"h-8 w-8 flex items-center justify-center text-foreground hover:bg-accent hover:text-accent-foreground transition-colors rounded";

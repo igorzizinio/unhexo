@@ -1,8 +1,8 @@
 import { ContextMenu } from "@base-ui/react/context-menu";
 import type { TargetedUIEvent } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import { useFiles } from "../../context/FileContext";
-import HexRow from "../hex-row";
+import HexRow from "@/lib/components/hex-row";
+import { useFiles } from "@/lib/context/FileContext";
 
 interface HexViewerProps {
 	tabId: string;
