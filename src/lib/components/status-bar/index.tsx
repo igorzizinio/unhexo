@@ -14,8 +14,8 @@ const StatusBar = ({ viewMode }: StatusBarProps) => {
 			<div className="h-6 px-4 text-xs flex items-center bg-accent text-foreground/80 justify-between">
 				<div className="flex gap-4 h-full items-center select-none">
 					<span className="flex items-center hover:bg-accent-foreground/20 h-full px-2 cursor-default">
-						{active?.fileName}
-						{active?.hasChanged ? "*" : ""}
+						{active?.fileName ?? "No file opened"}
+						{active?.hasChanged && "*"}
 					</span>
 				</div>
 				<div className="flex gap-4 h-full items-center select-none">
@@ -23,7 +23,7 @@ const StatusBar = ({ viewMode }: StatusBarProps) => {
 						View Mode: {viewMode}
 					</span>
 					<span className="flex items-center hover:bg-accent-foreground/20 h-full px-2 cursor-default">
-						{active ? `${active.data.length} bytes` : "No file opened"}
+						{active ? `${active.data.length} bytes` : "0 bytes"}
 					</span>
 				</div>
 			</div>
