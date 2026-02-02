@@ -161,41 +161,93 @@
 		--ring: 55% 0.18 24; /* #d63f3f */
 	}
 
-	/* Furina theme */
-	[data-theme="furina"] {
-		--background: 22% 0.08 270;
-		--foreground: 98% 0.01 240;
+	/* Furina theme - Based on Furina from Genshin Impact */
+	[data-theme="furina-ousia"] {
+		/* Base - Deep elegant navy blue (her main outfit) */
+		--background: 18% 0.055 255; /* Deep navy blue */
+		--foreground: 95% 0.015 240; /* Soft white with slight blue tint */
 
-		--card: 28% 0.095 268;
-		--card-foreground: 98% 0.01 240;
+		/* Card - Slightly elevated royal blue surface */
+		--card: 22% 0.065 252; /* Royal blue surface */
+		--card-foreground: 95% 0.015 240; /* Soft white */
 
-		--popover: 32% 0.11 267;
-		--popover-foreground: 98% 0.01 240;
+		/* Popover - Richer blue for highest elevation */
+		--popover: 26% 0.07 250; /* Rich royal blue */
+		--popover-foreground: 95% 0.015 240; /* Soft white */
 
-		--primary: 68% 0.16 245;
-		--primary-foreground: 20% 0.08 270;
+		/* Primary - Periwinkle blue (her dress and key visual elements) */
+		--primary: 72% 0.11 260; /* Periwinkle/lavender blue */
+		--primary-foreground: 18% 0.055 255; /* Deep navy for contrast */
 
-		--secondary: 42% 0.17 272;
-		--secondary-foreground: 98% 0.01 240;
+		/* Secondary - Soft aqua (her water element and hair highlights) */
+		--secondary: 78% 0.095 235; /* Soft blue-aqua */
+		--secondary-foreground: 18% 0.055 255; /* Deep navy */
 
-		--muted: 36% 0.1 268;
-		--muted-foreground: 85% 0.03 250;
+		/* Muted - Medium blue-grey */
+		--muted: 32% 0.055 252; /* Muted blue-grey */
+		--muted-foreground: 75% 0.04 245; /* Light blue-grey text */
 
-		--accent: 82% 0.14 220;
-		--accent-foreground: 20% 0.08 270;
+		/* Accent - Bright aqua (water effects and active states) */
+		--accent: 58.49% 0.12712 245; /* Bright blue-aqua */
+		--accent-foreground: 18% 0.055 255; /* Deep navy */
 
-		--highlight: 82% 0.12 95;
-		--highlight-foreground: 20% 0.08 270;
+		/* Highlight - Golden (her accessories and important details) */
+		--highlight: 85% 0.13 85; /* Elegant gold */
+		--highlight-foreground: 18% 0.055 255; /* Deep navy */
 
-		--destructive: 65% 0.2 20;
-		--destructive-foreground: 98% 0.01 240;
+		/* Destructive - Coral pink (elegant contrast) */
+		--destructive: 68% 0.18 15; /* Coral/salmon pink */
+		--destructive-foreground: 95% 0.015 240; /* Soft white */
 
-		--border: 38% 0.11 268;
-		--input: 30% 0.1 269;
-		--ring: 70% 0.16 240;
+		/* Borders & inputs - Medium elegant blue */
+		--border: 38% 0.065 252; /* Defined blue border */
+		--input: 28% 0.06 254; /* Slightly lighter than card */
+		--ring: 82% 0.12 235; /* Bright blue focus ring */
 	}
 
+	/* Furina Light theme - Light elegant variant */
+	[data-theme="furina-pneuma"] {
+		/* Base - Soft pale blue background */
+		--background: 97% 0.02 240; /* Very light blue-white */
+		--foreground: 22% 0.05 255; /* Deep navy text */
 
+		/* Card - Slightly deeper blue-tinted white */
+		--card: 95% 0.025 245; /* Soft blue-white card */
+		--card-foreground: 22% 0.05 255; /* Deep navy text */
+
+		/* Popover - Clean white with blue tint */
+		--popover: 98% 0.015 240; /* Almost white with blue tint */
+		--popover-foreground: 22% 0.05 255; /* Deep navy text */
+
+		/* Primary - Rich periwinkle (Furina's dress) */
+		--primary: 58% 0.14 260; /* Rich periwinkle */
+		--primary-foreground: 97% 0.02 240; /* Light background */
+
+		/* Secondary - Aqua blue (water element) */
+		--secondary: 65% 0.12 235; /* Blue-aqua */
+		--secondary-foreground: 97% 0.02 240; /* Light background */
+
+		/* Muted - Light blue-grey */
+		--muted: 92% 0.02 245; /* Very light blue-grey */
+		--muted-foreground: 48% 0.05 250; /* Medium blue-grey text */
+
+		/* Accent - Bright cyan (water sparkle) */
+		--accent: 88% 0.08 240; /* Light bright blue */
+		--accent-foreground: 22% 0.05 255; /* Deep navy */
+
+		/* Highlight - Warm gold (accessories) */
+		--highlight: 75% 0.12 75; /* Warm golden yellow */
+		--highlight-foreground: 22% 0.05 255; /* Deep navy */
+
+		/* Destructive - Vibrant coral */
+		--destructive: 58% 0.18 15; /* Vibrant coral pink */
+		--destructive-foreground: 97% 0.02 240; /* Light background */
+
+		/* Borders & inputs - Soft blue-grey */
+		--border: 85% 0.04 245; /* Light blue-grey border */
+		--input: 93% 0.025 245; /* Very light input background */
+		--ring: 65% 0.12 235; /* Blue focus ring */
+	}
 
 	body {
 		@apply bg-background text-foreground antialiased;

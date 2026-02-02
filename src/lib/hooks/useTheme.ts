@@ -5,12 +5,18 @@ export const THEMES = [
 	"dark",
 	"rose-pine",
 	"remofer",
-	"furina",
+	"furina-ousia",
+	"furina-pneuma",
 ] as const;
 
 export type Theme = (typeof THEMES)[number];
 
-const customThemes = new Set(["rose-pine", "remofer", "furina"]);
+const customThemes = new Set([
+	"rose-pine",
+	"remofer",
+	"furina-ousia",
+	"furina-pneuma",
+]);
 
 export function useTheme() {
 	const [theme, setTheme] = useState<Theme>(() => {
