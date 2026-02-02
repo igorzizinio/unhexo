@@ -262,8 +262,20 @@ export function HexViewer({
 
 			e.preventDefault();
 			setSelectedByte(newIndex);
-			setSelectionStart(newIndex);
-			setSelectionEnd(newIndex);
+
+			// Handle selection with Shift key
+			if (e.shiftKey) {
+				// If no selection exists, start from current position
+				if (selectionStart === null) {
+					setSelectionStart(selectedByte);
+				}
+				setSelectionEnd(newIndex);
+			} else {
+				// Without Shift, move cursor and reset selection to single byte
+				setSelectionStart(newIndex);
+				setSelectionEnd(newIndex);
+			}
+
 			setHexNibble("high");
 		},
 		[buffer, selectedByte, hexNibble, copySelectionHex, onHasChanged, diffSet],
