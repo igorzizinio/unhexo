@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
-import lazy from "preact-iso/lazy";
 import type { MosaicNode } from "react-mosaic-component";
+import { Mosaic } from "react-mosaic-component";
+import { HexViewer } from "./lib/components/hex-viewer";
 import StatusBar from "./lib/components/status-bar";
 import { Tabs } from "./lib/components/tabs";
 import Titlebar from "./lib/components/titlebar";
@@ -10,14 +11,6 @@ import type { EditorWindow, ViewMode } from "./types";
 
 //! DO NO REMOVE: this is necessary for the mosaic works
 import "react-mosaic-component/react-mosaic-component.css";
-
-const HexViewer = lazy(() =>
-	import("./lib/components/hex-viewer").then((m) => m.HexViewer),
-);
-
-const Mosaic = lazy(() =>
-	import("react-mosaic-component").then((m) => m.Mosaic),
-);
 
 function AppContent() {
 	const {
