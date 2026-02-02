@@ -117,6 +117,50 @@
 		--ring: 78% 0.095 267; /* Iris */
 	}
 
+	/* Remofer theme - Gray/Black with Red */
+	[data-theme="remofer"] {
+		/* Base colors - Dark gray/black */
+		--background: 13% 0 0; /* #1a1a1a */
+		--foreground: 95% 0 0; /* #f2f2f2 */
+
+		/* Card colors */
+		--card: 16% 0 0; /* #282828 */
+		--card-foreground: 95% 0 0; /* #f2f2f2 */
+
+		/* Popover */
+		--popover: 18% 0 0; /* #2d2d2d */
+		--popover-foreground: 95% 0 0; /* #f2f2f2 */
+
+		/* Primary - Red */
+		--primary: 55% 0.18 24; /* #d63f3f */
+		--primary-foreground: 95% 0 0; /* #f2f2f2 */
+
+		/* Secondary - Medium Gray */
+		--secondary: 45% 0 0; /* #737373 */
+		--secondary-foreground: 95% 0 0; /* #f2f2f2 */
+
+		/* Muted - Dark Gray */
+		--muted: 35% 0 0; /* #595959 */
+		--muted-foreground: 75% 0 0; /* #bfbfbf */
+
+		/* Accent - Bright Red */
+		--accent: 60% 0.2 25; /* #e74c3c */
+		--accent-foreground: 95% 0 0; /* #f2f2f2 */
+
+		/* Highlight for changed bytes - Red */
+		--highlight: 62% 0.22 25; /* #ea4b3b */
+		--highlight-foreground: 95% 0 0; /* #f2f2f2 */
+
+		/* Destructive - Dark Red */
+		--destructive: 48% 0.2 24; /* #b83232 */
+		--destructive-foreground: 95% 0 0; /* #f2f2f2 */
+
+		/* Borders & inputs - Gray */
+		--border: 25% 0 0; /* #404040 */
+		--input: 22% 0 0; /* #383838 */
+		--ring: 55% 0.18 24; /* #d63f3f */
+	}
+
 	body {
 		@apply bg-background text-foreground antialiased;
 		scrollbar-color: var(--color-border) var(--color-background);
@@ -140,14 +184,7 @@
 
 	*::-webkit-scrollbar-thumb {
 		@apply bg-border rounded hover:bg-muted-foreground/30;
-	}
-
-	/* Smooth transitions for theme changes */
-	html {
-		transition:
-			background-color 0.2s ease,
-			color 0.2s ease;
-	}
+	}	
 
 	/* Better focus rings */
 	button:focus-visible,

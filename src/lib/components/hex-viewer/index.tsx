@@ -355,7 +355,7 @@ export function HexViewer({
 	return (
 		// biome-ignore lint: ééé precisamos disso
 		<section
-			className={`h-full flex flex-col border-2 transition-colors rounded ${
+			className={`h-full flex flex-col border-2 rounded ${
 				isActive ? "border-primary ring-1 ring-primary/40" : "border-border"
 			} ${className ?? ""}`}
 			ref={rootRef}
@@ -367,7 +367,7 @@ export function HexViewer({
 			tabIndex={0}
 			onKeyDown={handleKeyDown}
 		>
-			<div className="bg-muted border-b border-border px-4 py-2 flex gap-4 font-mono text-xs">
+			<div className="bg-accent border-b border-border px-4 py-2 flex gap-4 font-mono text-xs cursor-default ">
 				<div className="w-20">Offset</div>
 				<div className="flex">
 					{Array.from({ length: BYTES_PER_ROW }, (_, i) => (

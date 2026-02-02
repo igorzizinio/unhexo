@@ -7,7 +7,7 @@ import { exit } from "@tauri-apps/plugin-process";
 import { useState } from "preact/hooks";
 import type { ViewMode } from "../../../types";
 import { useFiles } from "../../context/FileContext";
-import { useTheme } from "../../hooks/useTheme";
+import { THEMES, useTheme } from "../../hooks/useTheme";
 import About from "../about";
 import { MenubarItem, MenubarMenu, MenubarSubmenu } from "../ui/menubar-menu";
 import { NewFileDialog } from "../ui/new-file-dialog";
@@ -21,8 +21,7 @@ interface TitlebarProps {
 
 const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 	const appWindow = getCurrentWindow();
-	const { theme, toggleTheme, setLightTheme, setDarkTheme, setRosePineTheme } =
-		useTheme();
+	const { theme, toggleTheme, setTheme } = useTheme();
 	const { openFile: addFile } = useFiles();
 
 	const [newFileOpen, setNewFileOpen] = useState(false);
@@ -98,15 +97,15 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 					</MenubarSubmenu>
 					<Separator className="my-1 h-px w-full bg-border" />
 					<MenubarSubmenu label="Theme">
-						<MenubarItem onClick={setLightTheme}>
-							Light {theme === "light" && "✓"}
-						</MenubarItem>
-						<MenubarItem onClick={setDarkTheme}>
-							Dark {theme === "dark" && "✓"}
-						</MenubarItem>
-						<MenubarItem onClick={setRosePineTheme}>
-							Rose Pine {theme === "rose-pine" && "✓"}
-						</MenubarItem>
+						{THEMES.map((t) => (
+							<MenubarItem key={t} onClick={() => setTheme(t)}>
+								{t
+									.split("-")
+									.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+									.join(" ")}
+								{theme === t && " ✓"}
+							</MenubarItem>
+						))}
 					</MenubarSubmenu>
 					<Separator className="my-1 h-px w-full bg-border" />
 					<MenubarItem onClick={() => setAboutOpen(true)}>About</MenubarItem>

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "preact/hooks";
 
-type Theme = "light" | "dark" | "rose-pine";
+export const THEMES = ["light", "dark", "rose-pine", "remofer"] as const;
 
-const customThemes = new Set(["rose-pine"]);
+export type Theme = (typeof THEMES)[number];
+
+const customThemes = new Set(["rose-pine", "remofer"]);
 
 export function useTheme() {
 	const [theme, setTheme] = useState<Theme>(() => {
@@ -31,18 +33,11 @@ export function useTheme() {
 		setTheme((prev) => (prev === "dark" ? "light" : "dark"));
 	};
 
-	const setDarkTheme = () => setTheme("dark");
-	const setLightTheme = () => setTheme("light");
-	const setRosePineTheme = () => setTheme("rose-pine");
-
 	return {
 		theme,
 		isDark: theme === "dark",
 		isCustomTheme: customThemes.has(theme),
 		toggleTheme,
 		setTheme,
-		setDarkTheme,
-		setLightTheme,
-		setRosePineTheme,
 	};
 }
