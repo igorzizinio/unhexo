@@ -23,7 +23,7 @@ const StatusBar = ({ viewMode }: StatusBarProps) => {
 						View Mode: {viewMode}
 					</span>
 					<span className="flex items-center hover:bg-accent-foreground/20 h-full px-2 cursor-default">
-						{active ? `${active.data.length} bytes` : "0 bytes"}
+						{active ? `${active.fileSize} bytes` : "0 bytes"}
 					</span>
 				</div>
 			</div>

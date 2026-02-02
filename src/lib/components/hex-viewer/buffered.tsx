@@ -1,5 +1,4 @@
 import { ContextMenu } from "@base-ui/react/context-menu";
-import type { JSX } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import HexRow from "@/lib/components/hex-row";
 import { useFiles } from "@/lib/context/FileContext";
