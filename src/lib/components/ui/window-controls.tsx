@@ -11,7 +11,7 @@ const BUTTON_ICON_CLASS =
 	"h-8 w-8 flex items-center justify-center text-foreground hover:bg-accent hover:text-accent-foreground transition-colors rounded";
 
 interface WindowControlsProps {
-	theme: "light" | "dark";
+	theme: "light" | "dark" | "rose-pine";
 	onToggleTheme: () => void;
 	onMinimize: () => Promise<void>;
 	onMaximize: () => Promise<void>;

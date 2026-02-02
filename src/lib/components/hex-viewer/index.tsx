@@ -397,7 +397,7 @@ export function HexViewer({
 
 				<ContextMenu.Portal>
 					<ContextMenu.Positioner side="bottom" align="start">
-						<ContextMenu.Popup className="flex flex-col text-sm bg-popover border rounded-md shadow-md p-2 text-foreground">
+						<ContextMenu.Popup className="flex flex-col text-sm bg-popover border border-border rounded-md shadow-md p-2 text-foreground">
 							<ContextMenu.Item
 								onClick={copyOffset}
 								className={

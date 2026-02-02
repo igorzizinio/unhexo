@@ -209,7 +209,7 @@ function AppContent() {
 				)}
 			</main>
 
-			<StatusBar />
+			<StatusBar viewMode={viewMode} />
 		</div>
 	);
 }

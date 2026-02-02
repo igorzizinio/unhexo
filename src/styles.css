@@ -27,52 +27,132 @@
 @layer base {
 	:root {
 		--background: 100% 0 0;
-		--foreground: 8.9% 0.043 285.82;
+		--foreground: 10% 0 0;
 		--card: 100% 0 0;
-		--card-foreground: 8.9% 0.043 285.82;
+		--card-foreground: 10% 0 0;
 		--popover: 100% 0 0;
-		--popover-foreground: 8.9% 0.043 285.82;
-		--primary: 16.5% 0.031 285.82;
-		--primary-foreground: 98.3% 0.007 264.53;
-		--secondary: 96.5% 0.003 264.53;
-		--secondary-foreground: 16.5% 0.031 285.82;
-		--muted: 96.5% 0.003 264.53;
-		--muted-foreground: 58.9% 0.015 257.22;
-		--accent: 96.5% 0.003 264.53;
-		--accent-foreground: 16.5% 0.031 285.82;
-		--destructive: 64.8% 0.209 27.33;
-		--destructive-foreground: 98.3% 0.007 264.53;
-		--border: 92.6% 0.007 257.22;
-		--input: 92.6% 0.007 257.22;
-		--ring: 8.9% 0.043 285.82;
+		--popover-foreground: 10% 0 0;
+		--primary: 47% 0.12 255;
+		--primary-foreground: 100% 0 0;
+		--secondary: 96% 0 0;
+		--secondary-foreground: 10% 0 0;
+		--muted: 96% 0 0;
+		--muted-foreground: 45% 0 0;
+		--accent: 96% 0 0;
+		--accent-foreground: 10% 0 0;
+		--destructive: 62% 0.22 25;
+		--destructive-foreground: 100% 0 0;
+		--border: 90% 0 0;
+		--input: 90% 0 0;
+		--ring: 47% 0.12 255;
+		--highlight: 75% 0.15 60;
+		--highlight-foreground: 10% 0 0;
 	}
 
 	.dark {
-		--background: 8.9% 0.043 285.82;
-		--foreground: 98.3% 0.007 264.53;
-		--card: 8.9% 0.043 285.82;
-		--card-foreground: 98.3% 0.007 264.53;
-		--popover: 8.9% 0.043 285.82;
-		--popover-foreground: 98.3% 0.007 264.53;
-		--primary: 98.3% 0.007 264.53;
-		--primary-foreground: 16.5% 0.031 285.82;
-		--secondary: 26.8% 0.03 257.22;
-		--secondary-foreground: 98.3% 0.007 264.53;
-		--highlight: 41.2% 0.145 27.33;
-		--highlight-foreground: 98.3% 0.007 264.53;
-		--muted: 26.8% 0.03 257.22;
-		--muted-foreground: 73.9% 0.018 257.22;
-		--accent: 26.8% 0.03 257.22;
-		--accent-foreground: 98.3% 0.007 264.53;
-		--destructive: 41.2% 0.145 27.33;
-		--destructive-foreground: 98.3% 0.007 264.53;
-		--border: 26.8% 0.03 257.22;
-		--input: 26.8% 0.03 257.22;
-		--ring: 87.8% 0.019 257.22;
+		--background: 16% 0 0;
+		--foreground: 98% 0 0;
+		--card: 16% 0 0;
+		--card-foreground: 98% 0 0;
+		--popover: 16% 0 0;
+		--popover-foreground: 98% 0 0;
+		--primary: 58% 0.12 255;
+		--primary-foreground: 16% 0 0;
+		--secondary: 22% 0 0;
+		--secondary-foreground: 98% 0 0;
+		--highlight: 68% 0.18 50;
+		--highlight-foreground: 10% 0 0;
+		--muted: 22% 0 0;
+		--muted-foreground: 65% 0 0;
+		--accent: 22% 0 0;
+		--accent-foreground: 98% 0 0;
+		--destructive: 62% 0.22 25;
+		--destructive-foreground: 98% 0 0;
+		--border: 24% 0 0;
+		--input: 24% 0 0;
+		--ring: 58% 0.12 255;
+	}
+
+	/* Rose Pine theme - Official palette */
+	[data-theme="rose-pine"] {
+		/* Base colors */
+		--background: 19.5% 0.022 285; /* Base #191724 */
+		--foreground: 92% 0.048 270; /* Text #e0def4 */
+
+		/* Card colors */
+		--card: 22% 0.02 283; /* Surface #1f1d2e */
+		--card-foreground: 92% 0.048 270; /* Text */
+
+		/* Popover */
+		--popover: 24% 0.024 285; /* Overlay #26233a */
+		--popover-foreground: 92% 0.048 270; /* Text */
+
+		/* Primary (Iris) */
+		--primary: 78% 0.095 267; /* Iris #c4a7e7 */
+		--primary-foreground: 19.5% 0.022 285; /* Base */
+
+		/* Secondary */
+		--secondary: 30% 0.022 285; /* Highlight Med #403d52 */
+		--secondary-foreground: 92% 0.048 270; /* Text */
+
+		/* Muted */
+		--muted: 30% 0.022 285; /* Highlight Med */
+		--muted-foreground: 63% 0.03 272; /* Subtle #908caa */
+
+		/* Accent (Foam) */
+		--accent: 30% 0.022 285; /* Highlight Med */
+		--accent-foreground: 92% 0.048 270; /* Text */
+
+		/* Highlight for changed bytes (Gold) */
+		--highlight: 81% 0.098 52; /* Gold #f6c177 */
+		--highlight-foreground: 19.5% 0.022 285; /* Base - dark text for contrast */
+
+		/* Destructive (Love) */
+		--destructive: 70% 0.128 343; /* Love #eb6f92 */
+		--destructive-foreground: 92% 0.048 270; /* Text */
+
+		/* Borders & inputs */
+		--border: 37% 0.02 285; /* Highlight High #524f67 */
+		--input: 30% 0.022 285; /* Highlight Med */
+		--ring: 78% 0.095 267; /* Iris */
 	}
 
 	body {
+		@apply bg-background text-foreground antialiased;
 		scrollbar-color: var(--color-border) var(--color-background);
+	}
+
+	* {
+		@apply border-border;
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-border) var(--color-background);
+	}
+
+	/* Smooth scrollbars */
+	*::-webkit-scrollbar {
+		width: 12px;
+		height: 12px;
+	}
+
+	*::-webkit-scrollbar-track {
+		@apply bg-background;
+	}
+
+	*::-webkit-scrollbar-thumb {
+		@apply bg-border rounded hover:bg-muted-foreground/30;
+	}
+
+	/* Smooth transitions for theme changes */
+	html {
+		transition:
+			background-color 0.2s ease,
+			color 0.2s ease;
+	}
+
+	/* Better focus rings */
+	button:focus-visible,
+	[tabindex]:focus-visible {
+		@apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
 	}
 }
 

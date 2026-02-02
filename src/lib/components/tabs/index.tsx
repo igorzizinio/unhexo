@@ -18,9 +18,9 @@ export function Tabs({ tabs, activeTabId, onTabClick, onTabClose }: TabsProps) {
 		<ScrollArea.Root className="w-screen">
 			<ScrollArea.Scrollbar
 				orientation="horizontal"
-				className="m-2 flex w-1 justify-center rounded bg-gray-200 opacity-0 transition-opacity pointer-events-none data-[hovering]:opacity-100 data-[hovering]:delay-0 data-[hovering]:pointer-events-auto data-[scrolling]:opacity-100 data-[scrolling]:duration-0 data-[scrolling]:pointer-events-auto"
+				className="m-2 flex w-1 justify-center rounded bg-muted opacity-0 transition-opacity pointer-events-none data-[hovering]:opacity-100 data-[hovering]:delay-0 data-[hovering]:pointer-events-auto data-[scrolling]:opacity-100 data-[scrolling]:duration-0 data-[scrolling]:pointer-events-auto"
 			>
-				<ScrollArea.Thumb className="w-full rounded bg-gray-500" />
+				<ScrollArea.Thumb className="w-full rounded bg-muted-foreground" />
 			</ScrollArea.Scrollbar>
 			<ScrollArea.Viewport className="flex items-center w-full gap-1 bg-muted/30 border-b border-border px-2">
 				{tabs.map((tab) => {

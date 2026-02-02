@@ -21,7 +21,8 @@ interface TitlebarProps {
 
 const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 	const appWindow = getCurrentWindow();
-	const { theme, toggleTheme } = useTheme();
+	const { theme, toggleTheme, setLightTheme, setDarkTheme, setRosePineTheme } =
+		useTheme();
 	const { openFile: addFile } = useFiles();
 
 	const [newFileOpen, setNewFileOpen] = useState(false);
@@ -93,6 +94,18 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 						<MenubarItem onClick={() => setViewMode("tabs")}>Tabs</MenubarItem>
 						<MenubarItem onClick={() => setViewMode("mosaic")}>
 							Mosaic
+						</MenubarItem>
+					</MenubarSubmenu>
+					<Separator className="my-1 h-px w-full bg-border" />
+					<MenubarSubmenu label="Theme">
+						<MenubarItem onClick={setLightTheme}>
+							Light {theme === "light" && "✓"}
+						</MenubarItem>
+						<MenubarItem onClick={setDarkTheme}>
+							Dark {theme === "dark" && "✓"}
+						</MenubarItem>
+						<MenubarItem onClick={setRosePineTheme}>
+							Rose Pine {theme === "rose-pine" && "✓"}
 						</MenubarItem>
 					</MenubarSubmenu>
 					<Separator className="my-1 h-px w-full bg-border" />

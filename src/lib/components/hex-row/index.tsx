@@ -24,7 +24,7 @@ export default function HexRow({
 	return (
 		<div
 			style={{ top: offsetTop }}
-			className="absolute left-0 right-0 h-6 flex gap-4 px-4 font-mono text-xs hover:bg-accent/80"
+			className="absolute left-0 right-0 h-6 flex gap-4 px-4 font-mono text-xs hover:bg-accent/50 transition-colors"
 		>
 			<div className="flex w-20 text-muted-foreground select-none items-center">
 				{offset.toString(16).padStart(8, "0").toUpperCase()}
@@ -46,11 +46,13 @@ export default function HexRow({
 								onByteMouseDown(idx);
 							}}
 							onPointerEnter={(e) => e.buttons === 1 && onByteMouseEnter(idx)}
-							className={`w-6 h-6 ${
+							className={`w-6 h-6 rounded transition-colors ${
 								isByteSelected(idx)
-									? "bg-primary text-primary-foreground"
-									: "hover:bg-accent"
-							} ${diffSet?.has(idx) ? "bg-highlight" : ""}`}
+									? "bg-primary text-primary-foreground font-semibold"
+									: diffSet?.has(idx)
+										? "bg-highlight text-highlight-foreground font-bold"
+										: "hover:bg-accent hover:text-accent-foreground"
+							}`}
 						>
 							{data[idx].toString(16).padStart(2, "0").toUpperCase()}
 						</button>
@@ -77,11 +79,13 @@ export default function HexRow({
 								onByteMouseDown(idx);
 							}}
 							onPointerEnter={(e) => e.buttons === 1 && onByteMouseEnter(idx)}
-							className={`text-center text-muted-foreground ${
+							className={`text-center inline-block w-4 rounded transition-colors ${
 								isByteSelected(idx)
-									? "bg-primary text-primary-foreground"
-									: "hover:bg-accent"
-							} ${diffSet?.has(idx) ? "bg-highlight" : ""} inline-block w-4`}
+									? "bg-primary text-primary-foreground font-semibold"
+									: diffSet?.has(idx)
+										? "bg-highlight text-highlight-foreground font-bold"
+										: "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+							}`}
 						>
 							{char}
 						</span>
