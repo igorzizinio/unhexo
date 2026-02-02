@@ -1,3 +1,14 @@
+interface HexRowProps {
+	index: number;
+	data: Uint8Array;
+	offsetTop: number;
+	isByteSelected: (i: number) => boolean;
+	onByteMouseDown: (i: number) => void;
+	onByteMouseEnter: (i: number) => void;
+	diffSet?: Set<number> | null;
+	bytesPerRow: number;
+}
+
 export default function HexRow({
 	index,
 	data,
@@ -7,16 +18,7 @@ export default function HexRow({
 	onByteMouseEnter,
 	diffSet,
 	bytesPerRow,
-}: Readonly<{
-	index: number;
-	data: Uint8Array;
-	offsetTop: number;
-	isByteSelected: (i: number) => boolean;
-	onByteMouseDown: (i: number) => void;
-	onByteMouseEnter: (i: number) => void;
-	diffSet?: Set<number> | null;
-	bytesPerRow: number;
-}>) {
+}: Readonly<HexRowProps>) {
 	const offset = index * bytesPerRow;
 
 	return (
