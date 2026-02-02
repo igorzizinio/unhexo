@@ -2317,6 +2317,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"preact-iso@npm:^2.11.1":
+  version: 2.11.1
+  resolution: "preact-iso@npm:2.11.1"
+  peerDependencies:
+    preact: ">=10 || >= 11.0.0-0"
+    preact-render-to-string: ">=6.4.0"
+  checksum: 10c0/1ebe3e3762348ec11cc7f18c53a79f9ee2f12ac27fcddd27a96730aa647f0557c84670f945e6562b98a8ad033b36a138e90a0b335cfe4cd3a7cdc71b78624f02
+  languageName: node
+  linkType: hard
+
 "preact@npm:^10.28.2":
   version: 10.28.2
   resolution: "preact@npm:10.28.2"
@@ -2752,6 +2762,7 @@ __metadata:
     "@tauri-apps/plugin-store": "npm:~2.4.2"
     lucide-preact: "npm:^0.563.0"
     preact: "npm:^10.28.2"
+    preact-iso: "npm:^2.11.1"
     react-mosaic-component: "npm:^6.1.1"
     tailwindcss: "npm:^4.1.18"
     typescript: "npm:~5.9.3"

@@ -367,7 +367,7 @@ export function HexViewer({
 			tabIndex={0}
 			onKeyDown={handleKeyDown}
 		>
-			<div className="bg-accent border-b border-border px-4 py-2 flex gap-4 font-mono text-xs cursor-default ">
+			<div className="bg-accent border-b border-border px-4 py-2 flex gap-4 font-mono text-xs select-none">
 				<div className="w-20">Offset</div>
 				<div className="flex">
 					{Array.from({ length: BYTES_PER_ROW }, (_, i) => (
