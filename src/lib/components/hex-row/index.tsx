@@ -79,7 +79,7 @@ export default function HexRow({
 								onByteMouseDown(idx);
 							}}
 							onPointerEnter={(e) => e.buttons === 1 && onByteMouseEnter(idx)}
-							className={`text-center inline-block w-4 rounded transition-colors ${
+							className={`text-center inline-block w-4 h-4 rounded ${
 								isByteSelected(idx)
 									? "bg-primary text-primary-foreground font-semibold"
 									: diffSet?.has(idx)
