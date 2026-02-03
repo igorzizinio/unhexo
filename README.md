@@ -5,7 +5,15 @@
 Primary development happens on [Codeberg](https://codeberg.org/igorzizinio/unhexo).
 A [GitHub](https://github.com/igorzizinio/unhexo) repository is provided as a **read-only mirror** for visibility purposes.
 
-Please report issues and open pull requests on Codeberg.
+Please report issues and open pull requests on [Codeberg](https://codeberg.org/igorzizinio/unhexo).
+
+---
+
+## Project Status
+
+unhexo is in **early development**.
+
+The project is still experimental and design, features, and behavior may change frequently.
 
 ---
 
@@ -14,9 +22,11 @@ Please report issues and open pull requests on Codeberg.
 Features currently planned or under development:
 
 - [ ] Hex file reading
-- [ ] Tabs
+  - [ ] Chunked file reading (large files)
+- [ ] Tabs and workspaces
+  - [ ] Persist state in local storage
+  - [ ] Workspaces track closed tabs
 - [ ] File comparison
-- [ ] Workspaces
 - [ ] Theming
 
 ---
@@ -28,6 +38,20 @@ Features currently planned or under development:
 - Notion (desktop)
 
 ---
+
+## Does it support large files? (・_・?)
+
+Yes.
+
+In my tests, a **33GB** file opened instantly.  
+No full file loading — just opening… something *very* big.
+
+(≧◡≦)
+
+> 33GB?  
+> In this hex editor?  
+> Yeah… so big... it fits. (⁄ ⁄•⁄ω⁄•⁄ ⁄)  
+> (≖‿≖)
 
 ## License
 
