@@ -1,29 +1,21 @@
-import { useEffect, useMemo, useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import type { MosaicNode } from "react-mosaic-component";
 import { Mosaic } from "react-mosaic-component";
-import { HexViewer } from "./lib/components/hex-viewer";
-import { BufferedHexViewer } from "./lib/components/hex-viewer/buffered";
 import StatusBar from "./lib/components/status-bar";
 import { Tabs } from "./lib/components/tabs";
 import Titlebar from "./lib/components/titlebar";
 import { FileProvider, useFiles } from "./lib/context/FileContext";
-import { diffBuffers } from "./lib/utils/diffBuffers";
+import { useDiff } from "./lib/hooks/useDiff";
 import type { EditorWindow, ViewMode } from "./types";
 
 //! DO NO REMOVE: this is necessary for the mosaic works
 import "react-mosaic-component/react-mosaic-component.css";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
+import { BufferedHexViewer } from "./lib/components/hex-viewer";
 
 function AppContent() {
-	const {
-		tabs,
-		activeTabId,
-		setActiveTab,
-		closeTab,
-		activeTab,
-		saveTab,
-		markAsChanged,
-	} = useFiles();
+	const { tabs, activeTabId, setActiveTab, closeTab, activeTab, saveTab } =
+		useFiles();
 
 	const [viewMode, setViewMode] = useState<ViewMode>("tabs");
 	const [windows, setWindows] = useState<Record<string, EditorWindow>>({});
@@ -40,13 +32,13 @@ function AppContent() {
 	const leftTab = tabs[0] ?? null;
 	const rightTab = tabs[1] ?? null;
 
-	const diffSet = useMemo(() => {
-		if (!leftTab || !rightTab) return null;
-		return diffBuffers(
-			leftTab.buffer ?? new Uint8Array(0),
-			rightTab.buffer ?? new Uint8Array(0),
-		);
-	}, [leftTab?.buffer, rightTab?.buffer]);
+	// Use the new changeset-based diff algorithm
+	// Only computes diffs when in mosaic mode with exactly 2 tabs
+	const diffSet = useDiff(
+		leftTab && rightTab ? leftTab : null,
+		leftTab && rightTab ? rightTab : null,
+		{ strategy: "changeset" },
+	);
 
 	// =========================
 	// Mosaic / Layout
@@ -104,13 +96,8 @@ function AppContent() {
 	}, [viewMode, tabs, activeTabId]);
 
 	// =========================
-	// Save
+	// Zoom
 	// =========================
-
-	async function handleSaveRequest(data: Uint8Array) {
-		if (!activeTab) return;
-		await saveTab(activeTab.id, data);
-	}
 
 	useEffect(() => {
 		getCurrentWebview().setZoom(zoomLevel);
@@ -149,7 +136,7 @@ function AppContent() {
 					case "s": {
 						e.preventDefault();
 						if (!activeTab) return;
-						handleSaveRequest(activeTab.buffer ?? new Uint8Array(0));
+						saveTab(activeTab.id);
 						break;
 					}
 				}
@@ -169,9 +156,7 @@ function AppContent() {
 			<Titlebar
 				viewMode={viewMode}
 				setViewMode={setViewMode}
-				onSaveRequest={() =>
-					saveTab(activeTabId ?? "", activeTab?.buffer ?? new Uint8Array(0))
-				}
+				onSaveRequest={() => activeTabId && saveTab(activeTabId)}
 			/>
 
 			<Tabs
@@ -186,26 +171,18 @@ function AppContent() {
 			>
 				{viewMode === "tabs" &&
 					activeTab &&
-					(activeTab.isBuffered && activeTab.filePath ? (
+					(activeTab.filePath ? (
 						<BufferedHexViewer
 							tabId={activeTab.id}
 							filePath={activeTab.filePath}
 							fileSize={activeTab.fileSize}
+							changeSet={activeTab.changeSet}
 							diffSet={null}
 							isActive
 							onActivate={() => setActiveTab(activeTab.id)}
-							onHasChanged={(c) => markAsChanged(activeTab.id, c)}
+							version={activeTab.version}
 						/>
-					) : (
-						<HexViewer
-							tabId={activeTab.id}
-							buffer={activeTab.buffer ?? new Uint8Array(0)}
-							diffSet={null}
-							isActive
-							onActivate={() => setActiveTab(activeTab.id)}
-							onHasChanged={(c) => markAsChanged(activeTab.id, c)}
-						/>
-					))}
+					) : null)}
 
 				{viewMode === "mosaic" && mosaicValue && (
 					<Mosaic
@@ -227,26 +204,18 @@ function AppContent() {
 
 							if (!tab) return null;
 
-							return tab.isBuffered && tab.filePath ? (
+							return tab.filePath ? (
 								<BufferedHexViewer
 									tabId={tab.id}
 									filePath={tab.filePath}
 									fileSize={tab.fileSize}
+									changeSet={tab.changeSet}
 									diffSet={isComparable ? diffSet : null}
 									isActive={tab.id === activeTabId}
 									onActivate={() => setActiveTab(tab.id)}
-									onHasChanged={(c) => markAsChanged(tab.id, c)}
+									version={tab.version}
 								/>
-							) : (
-								<HexViewer
-									tabId={tab.id}
-									buffer={tab.buffer ?? new Uint8Array(0)}
-									diffSet={isComparable ? diffSet : null}
-									isActive={tab.id === activeTabId}
-									onActivate={() => setActiveTab(tab.id)}
-									onHasChanged={(c) => markAsChanged(tab.id, c)}
-								/>
-							);
+							) : null;
 						}}
 					/>
 				)}

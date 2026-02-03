@@ -52,12 +52,10 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 
 					const fileName = filePath.split(/[\\/]/).pop() || "Unknown";
 
-					// Add file with buffered mode
 					addFile({
 						filePath,
 						fileName,
 						fileSize: info.size,
-						isBuffered: true,
 					});
 				}
 			} catch (error) {
@@ -66,16 +64,22 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 		}
 	};
 
-	const createNewFile = (size: number) => {
-		const buffer = new Uint8Array(size);
-		const fileName = `untitled-${Date.now()}`;
+	const createNewFile = async (size: number) => {
+		try {
+			// Create a temporary file on disk
+			const tempPath = await invoke<string>("create_temp_file", { size });
+			const fileName = `untitled-${Date.now()}.bin`;
 
-		addFile({
-			fileName,
-			data: buffer,
-			hasChanged: true,
-			isBuffered: false,
-		});
+			// Open the temp file as a new tab
+			addFile({
+				fileName,
+				filePath: tempPath,
+				fileSize: size,
+				isTempFile: true,
+			});
+		} catch (error) {
+			console.error("Failed to create new file:", error);
+		}
 	};
 
 	const minimizeApp = async () => {

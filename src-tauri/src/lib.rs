@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{Read, Seek, SeekFrom};
+use std::io::{Read, Seek, SeekFrom, Write};
 use std::sync::Mutex;
 use tauri::State;
 
@@ -11,12 +11,6 @@ struct FileHandles {
 #[derive(serde::Serialize)]
 struct FileInfo {
     size: u64,
-}
-
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
 #[tauri::command]
@@ -58,6 +52,44 @@ fn close_file_handle(path: String, state: State<FileHandles>) -> Result<(), Stri
     Ok(())
 }
 
+#[tauri::command]
+fn create_temp_file(size: u64) -> Result<String, String> {
+    use std::env;
+
+    // Get system temp directory
+    let temp_dir = env::temp_dir();
+
+    // Create a unique filename
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_millis();
+    let filename = format!("unhexo_temp_{}.bin", timestamp);
+    let temp_path = temp_dir.join(filename);
+
+    // Create the file and fill it with zeros
+    let mut file = File::create(&temp_path).map_err(|e| e.to_string())?;
+    let zeros = vec![0u8; 4096]; // 4KB buffer
+    let mut remaining = size;
+
+    while remaining > 0 {
+        let to_write = remaining.min(zeros.len() as u64) as usize;
+        file.write_all(&zeros[..to_write])
+            .map_err(|e| e.to_string())?;
+        remaining -= to_write as u64;
+    }
+
+    file.flush().map_err(|e| e.to_string())?;
+
+    Ok(temp_path.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+fn delete_temp_file(path: String) -> Result<(), String> {
+    std::fs::remove_file(&path).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -70,10 +102,11 @@ pub fn run() {
             handles: Mutex::new(HashMap::new()),
         })
         .invoke_handler(tauri::generate_handler![
-            greet,
             open_file_handle,
             read_file_chunk,
-            close_file_handle
+            close_file_handle,
+            create_temp_file,
+            delete_temp_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

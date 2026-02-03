@@ -1,39 +1,50 @@
 import { ContextMenu } from "@base-ui/react/context-menu";
-import type { TargetedUIEvent } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import HexRow from "@/lib/components/hex-row";
 import { useFiles } from "@/lib/context/FileContext";
+import { useFileBuffer } from "@/lib/hooks/useFileBuffer";
 
-interface HexViewerProps {
+interface BufferedHexViewerProps {
 	tabId: string;
-	buffer: Uint8Array;
+	filePath: string;
+	fileSize: number;
+	changeSet: Record<number, number>;
 	isActive?: boolean;
 	onActivate?: () => void;
 	diffSet?: Set<number> | null;
-	onHasChanged?: (hasChanged: boolean) => void;
 	className?: string;
+	version?: number;
 }
 
 const ROW_HEIGHT = 24;
 const BYTES_PER_ROW = 16;
 const OVERSCAN = 15;
+const PRELOAD_ROWS = 100; // Preload 100 rows ahead
 
-export function HexViewer({
+export function BufferedHexViewer({
 	tabId,
-	buffer,
+	filePath,
+	fileSize,
+	changeSet,
 	isActive = false,
 	onActivate,
-	onHasChanged,
 	diffSet,
+	version = 0,
 	className,
-}: Readonly<HexViewerProps>) {
-	const { updateTabBuffer } = useFiles();
+}: Readonly<BufferedHexViewerProps>) {
+	const { updateChangeSet } = useFiles();
+	const fileBuffer = useFileBuffer();
 
 	const rootRef = useRef<HTMLElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 
-	const [scrollTop, setScrollTop] = useState(0);
+	const [virtualScrollTop, setVirtualScrollTop] = useState(0);
 	const [containerHeight, setContainerHeight] = useState(600);
+	const [visibleBuffer, setVisibleBuffer] = useState<Uint8Array>(
+		new Uint8Array(0),
+	);
+	const [visibleStartOffset, setVisibleStartOffset] = useState(0);
+	const [isDraggingScrollbar, setIsDraggingScrollbar] = useState(false);
 
 	const [selectedByte, setSelectedByte] = useState<number | null>(null);
 	const [selectionStart, setSelectionStart] = useState<number | null>(null);
@@ -41,6 +52,57 @@ export function HexViewer({
 	const [isSelecting, setIsSelecting] = useState(false);
 
 	const [hexNibble, setHexNibble] = useState<"high" | "low">("high");
+
+	// Open file buffer when component mounts or filePath changes
+	useEffect(() => {
+		if (filePath) {
+			fileBuffer.openFile(filePath);
+		}
+		return () => {
+			if (filePath) {
+				fileBuffer.closeFile();
+			}
+		};
+	}, [filePath, version]);
+
+	// Load visible data based on scroll position
+	useEffect(() => {
+		if (!fileBuffer.isReady) return;
+
+		const totalRows = Math.ceil(fileSize / BYTES_PER_ROW);
+
+		const loadVisibleData = async () => {
+			const startRow = Math.max(
+				0,
+				Math.floor(virtualScrollTop / ROW_HEIGHT) - OVERSCAN,
+			);
+			const endRow = Math.min(
+				totalRows,
+				Math.ceil((virtualScrollTop + containerHeight) / ROW_HEIGHT) + OVERSCAN,
+			);
+
+			const startOffset = startRow * BYTES_PER_ROW;
+			const endOffset = Math.min(fileSize, endRow * BYTES_PER_ROW);
+			const length = endOffset - startOffset;
+
+			if (length > 0) {
+				const data = await fileBuffer.readBytes(startOffset, length);
+				setVisibleBuffer(data);
+				setVisibleStartOffset(startOffset);
+
+				// Preload data ahead
+				const preloadEndOffset = Math.min(
+					fileSize,
+					endOffset + PRELOAD_ROWS * BYTES_PER_ROW,
+				);
+				if (preloadEndOffset > endOffset) {
+					fileBuffer.preloadRange(endOffset, preloadEndOffset);
+				}
+			}
+		};
+
+		loadVisibleData();
+	}, [virtualScrollTop, containerHeight, fileBuffer.isReady, fileSize]);
 
 	// =============================
 	// Utils
@@ -63,6 +125,23 @@ export function HexViewer({
 		[selectionStart, selectionEnd],
 	);
 
+	const getByteValue = useCallback(
+		(byteIndex: number): number => {
+			// Check changeSet first - modified bytes take precedence
+			if (byteIndex in changeSet) {
+				return changeSet[byteIndex];
+			}
+
+			// Otherwise read from the visible buffer
+			const offsetInVisible = byteIndex - visibleStartOffset;
+			if (offsetInVisible >= 0 && offsetInVisible < visibleBuffer.length) {
+				return visibleBuffer[offsetInVisible];
+			}
+			return 0;
+		},
+		[visibleBuffer, visibleStartOffset, changeSet],
+	);
+
 	// =============================
 	// Copy
 	// =============================
@@ -74,25 +153,29 @@ export function HexViewer({
 		);
 	}, [selectedByte]);
 
-	const copySelectionHex = useCallback(() => {
+	const copySelectionHex = useCallback(async () => {
 		if (selectionStart === null || selectionEnd === null) return;
 		const start = Math.min(selectionStart, selectionEnd);
 		const end = Math.max(selectionStart, selectionEnd);
-		const hex = Array.from(buffer.slice(start, end + 1))
+
+		const data = await fileBuffer.readBytes(start, end - start + 1);
+		const hex = Array.from(data)
 			.map((b) => b.toString(16).padStart(2, "0").toUpperCase())
 			.join(" ");
 		navigator.clipboard.writeText(hex);
-	}, [buffer, selectionStart, selectionEnd]);
+	}, [fileBuffer, selectionStart, selectionEnd]);
 
-	const copySelectionAscii = useCallback(() => {
+	const copySelectionAscii = useCallback(async () => {
 		if (selectionStart === null || selectionEnd === null) return;
 		const start = Math.min(selectionStart, selectionEnd);
 		const end = Math.max(selectionStart, selectionEnd);
-		const ascii = Array.from(buffer.slice(start, end + 1))
+
+		const data = await fileBuffer.readBytes(start, end - start + 1);
+		const ascii = Array.from(data)
 			.map((b) => (b >= 32 && b <= 126 ? String.fromCodePoint(b) : "."))
 			.join("");
 		navigator.clipboard.writeText(ascii);
-	}, [buffer, selectionStart, selectionEnd]);
+	}, [fileBuffer, selectionStart, selectionEnd]);
 
 	// =============================
 	// Effects
@@ -135,18 +218,18 @@ export function HexViewer({
 	// =============================
 
 	const handleKeyDown = useCallback(
-		(e: KeyboardEvent) => {
+		async (e: KeyboardEvent) => {
 			// Ctrl / Cmd
 			if (e.ctrlKey || e.metaKey) {
 				switch (e.key.toLowerCase()) {
 					case "c":
 						e.preventDefault();
-						e.shiftKey ? copySelectionAscii() : copySelectionHex();
+						e.shiftKey ? await copySelectionAscii() : await copySelectionHex();
 						return;
 					case "a":
 						e.preventDefault();
 						setSelectionStart(0);
-						setSelectionEnd(buffer.length - 1);
+						setSelectionEnd(fileSize - 1);
 						return;
 				}
 			}
@@ -173,8 +256,7 @@ export function HexViewer({
 				e.preventDefault();
 
 				const value = Number.parseInt(key, 16);
-				const newBuffer = buffer.slice();
-				const oldByte = newBuffer[selectedByte];
+				const oldByte = getByteValue(selectedByte);
 
 				let newByte: number;
 
@@ -185,20 +267,19 @@ export function HexViewer({
 					newByte = (oldByte & 0xf0) | value;
 					setHexNibble("high");
 
-					// avança cursor
-					if (selectedByte < newBuffer.length - 1) {
+					// Advance cursor
+					if (selectedByte < fileSize - 1) {
 						setSelectedByte(selectedByte + 1);
 						setSelectionStart(selectedByte + 1);
 						setSelectionEnd(selectedByte + 1);
 					}
 				}
 
-				newBuffer[selectedByte] = newByte;
-				updateTabBuffer(tabId, newBuffer);
-				onHasChanged?.(true);
+				// Update the changeSet with the new byte value
+				// No need to load the full buffer anymore
+				updateChangeSet(tabId, selectedByte, newByte);
 				return;
 			}
-
 			let newIndex = selectedByte;
 
 			switch (e.key) {
@@ -225,13 +306,13 @@ export function HexViewer({
 				}
 
 				case "ArrowRight":
-					newIndex = Math.min(selectedByte + 1, buffer.length - 1);
+					newIndex = Math.min(selectedByte + 1, fileSize - 1);
 					break;
 				case "ArrowLeft":
 					newIndex = Math.max(selectedByte - 1, 0);
 					break;
 				case "ArrowDown":
-					newIndex = Math.min(selectedByte + BYTES_PER_ROW, buffer.length - 1);
+					newIndex = Math.min(selectedByte + BYTES_PER_ROW, fileSize - 1);
 					break;
 				case "ArrowUp":
 					newIndex = Math.max(selectedByte - BYTES_PER_ROW, 0);
@@ -240,7 +321,7 @@ export function HexViewer({
 					newIndex = Math.min(
 						selectedByte +
 							BYTES_PER_ROW * Math.floor(containerHeight / ROW_HEIGHT),
-						buffer.length - 1,
+						fileSize - 1,
 					);
 					break;
 				case "PageUp":
@@ -254,7 +335,7 @@ export function HexViewer({
 					newIndex = 0;
 					break;
 				case "End":
-					newIndex = buffer.length - 1;
+					newIndex = fileSize - 1;
 					break;
 				default:
 					return;
@@ -278,25 +359,103 @@ export function HexViewer({
 
 			setHexNibble("high");
 		},
-		[buffer, selectedByte, hexNibble, copySelectionHex, onHasChanged, diffSet],
+		[
+			fileSize,
+			selectedByte,
+			hexNibble,
+			copySelectionHex,
+			diffSet,
+			getByteValue,
+			updateChangeSet,
+			tabId,
+			selectionStart,
+			containerHeight,
+		],
 	);
 
 	// =============================
 	// Scroll / Virtualization
 	// =============================
 
-	const totalRows = Math.ceil(buffer.length / BYTES_PER_ROW);
-	const totalHeight = totalRows * ROW_HEIGHT;
-
-	const startRow = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN);
-	const endRow = Math.min(
-		totalRows,
-		Math.ceil((scrollTop + containerHeight) / ROW_HEIGHT) + OVERSCAN,
+	const totalRows = Math.ceil(fileSize / BYTES_PER_ROW);
+	const maxVirtualScroll = Math.max(
+		0,
+		totalRows * ROW_HEIGHT - containerHeight,
 	);
 
-	const handleScroll = useCallback((e: TargetedUIEvent<HTMLDivElement>) => {
-		setScrollTop(e.currentTarget.scrollTop);
+	const startRow = Math.max(
+		0,
+		Math.floor(virtualScrollTop / ROW_HEIGHT) - OVERSCAN,
+	);
+	const endRow = Math.min(
+		totalRows,
+		Math.ceil((virtualScrollTop + containerHeight) / ROW_HEIGHT) + OVERSCAN,
+	);
+
+	// Handle scrollbar dragging
+	const handleScrollbarMouseDown = useCallback((e: MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		setIsDraggingScrollbar(true);
 	}, []);
+
+	const handleScrollbarDrag = useCallback(
+		(e: MouseEvent) => {
+			if (!isDraggingScrollbar || !containerRef.current) return;
+
+			const rect = containerRef.current.getBoundingClientRect();
+			const relativeY = e.clientY - rect.top;
+			const percentage = Math.max(0, Math.min(1, relativeY / rect.height));
+			const totalScrollableHeight = totalRows * ROW_HEIGHT;
+			const newScroll =
+				percentage * totalScrollableHeight - containerHeight / 2;
+
+			setVirtualScrollTop(Math.max(0, Math.min(maxVirtualScroll, newScroll)));
+		},
+		[isDraggingScrollbar, maxVirtualScroll, totalRows, containerHeight],
+	);
+
+	const handleScrollbarMouseUp = useCallback(() => {
+		setIsDraggingScrollbar(false);
+	}, []);
+
+	// Handle clicking on scrollbar track (not thumb)
+	const handleScrollbarTrackClick = useCallback(
+		(e: MouseEvent) => {
+			if (!containerRef.current) return;
+
+			// Only handle clicks on the track, not the thumb
+			const target = e.target as HTMLElement;
+			if (target.classList.contains("scrollbar-thumb")) return;
+
+			const rect = containerRef.current.getBoundingClientRect();
+			const relativeY = e.clientY - rect.top;
+			const percentage = Math.max(0, Math.min(1, relativeY / rect.height));
+			const totalScrollableHeight = totalRows * ROW_HEIGHT;
+			const newScroll =
+				percentage * totalScrollableHeight - containerHeight / 2;
+
+			setVirtualScrollTop(Math.max(0, Math.min(maxVirtualScroll, newScroll)));
+		},
+		[maxVirtualScroll, totalRows, containerHeight],
+	);
+
+	// Attach global mouse events for scrollbar dragging
+	useEffect(() => {
+		if (!isDraggingScrollbar) return;
+
+		const dragHandler = handleScrollbarDrag as unknown as EventListener;
+		const upHandler = handleScrollbarMouseUp as unknown as EventListener;
+
+		document.addEventListener("mousemove", dragHandler);
+		document.addEventListener("mouseup", upHandler);
+
+		return () => {
+			document.removeEventListener("mousemove", dragHandler);
+			document.removeEventListener("mouseup", upHandler);
+		};
+	}, [isDraggingScrollbar, handleScrollbarDrag, handleScrollbarMouseUp]);
 
 	// =============================
 	// Mouse
@@ -327,23 +486,27 @@ export function HexViewer({
 
 	useEffect(() => {
 		if (selectedByte === null) return;
-		if (!containerRef.current) return;
 
 		const rowIndex = Math.floor(selectedByte / BYTES_PER_ROW);
 		const byteTop = rowIndex * ROW_HEIGHT;
 		const byteBottom = byteTop + ROW_HEIGHT;
 
-		const viewTop = containerRef.current.scrollTop;
-		const viewBottom = viewTop + containerHeight;
+		setVirtualScrollTop((currentScroll) => {
+			const viewTop = currentScroll;
+			const viewBottom = viewTop + containerHeight;
 
-		if (byteTop < viewTop) {
-			containerRef.current.scrollTop = byteTop;
-			return;
-		}
+			// Only auto-scroll if the selected byte is outside the visible area
+			if (byteTop < viewTop) {
+				return byteTop;
+			}
 
-		if (byteBottom > viewBottom) {
-			containerRef.current.scrollTop = byteBottom - containerHeight;
-		}
+			if (byteBottom > viewBottom) {
+				return byteBottom - containerHeight;
+			}
+
+			// Don't change scroll if byte is already visible
+			return currentScroll;
+		});
 	}, [selectedByte, containerHeight]);
 
 	// =============================
@@ -378,30 +541,85 @@ export function HexViewer({
 			</div>
 
 			<ContextMenu.Root>
-				<ContextMenu.Trigger className="flex-1 overflow-hidden">
+				<ContextMenu.Trigger className="flex-1 overflow-hidden relative">
 					<div
 						ref={containerRef}
-						className="h-full overflow-y-auto"
-						onScroll={handleScroll}
+						className="h-full overflow-hidden relative"
+						onWheel={(e) => {
+							e.preventDefault();
+							// Scroll by 3 rows per wheel tick
+							const rowsToScroll = Math.sign(e.deltaY) * 3;
+							const scrollAmount = rowsToScroll * ROW_HEIGHT;
+							setVirtualScrollTop((prev) => {
+								const newScroll = prev + scrollAmount;
+								return Math.max(0, Math.min(maxVirtualScroll, newScroll));
+							});
+						}}
 					>
-						<div style={{ height: totalHeight, position: "relative" }}>
+						<div className="absolute inset-0">
 							{Array.from(
 								{ length: endRow - startRow },
 								(_, i) => startRow + i,
-							).map((rowIndex) => (
-								<HexRow
-									key={rowIndex}
-									bytesPerRow={BYTES_PER_ROW}
-									index={rowIndex}
-									data={buffer}
-									offsetTop={rowIndex * ROW_HEIGHT}
-									isByteSelected={isByteSelected}
-									onByteMouseDown={handleByteMouseDown}
-									onByteMouseEnter={handleByteMouseEnter}
-									diffSet={diffSet}
-								/>
-							))}
+							).map((rowIndex) => {
+								// Use the visible buffer for rendering
+								const rowOffset = rowIndex * BYTES_PER_ROW;
+								const offsetInVisible = rowOffset - visibleStartOffset;
+
+								// Only render rows that are in the visible buffer
+								if (
+									offsetInVisible < 0 ||
+									offsetInVisible >= visibleBuffer.length
+								) {
+									return null;
+								}
+
+								// Calculate position relative to virtualScrollTop
+								const absoluteTop = rowIndex * ROW_HEIGHT;
+								const relativeTop = absoluteTop - virtualScrollTop;
+
+								return (
+									<HexRow
+										key={rowIndex}
+										bytesPerRow={BYTES_PER_ROW}
+										index={rowIndex}
+										data={visibleBuffer}
+										dataOffset={visibleStartOffset}
+										offsetTop={relativeTop}
+										isByteSelected={isByteSelected}
+										onByteMouseDown={handleByteMouseDown}
+										onByteMouseEnter={handleByteMouseEnter}
+										diffSet={diffSet}
+										changeSet={changeSet}
+									/>
+								);
+							})}
 						</div>
+
+						{/* Custom Scrollbar */}
+						{maxVirtualScroll > 0 && (
+							<button
+								type="button"
+								aria-controls={containerRef.current?.id}
+								aria-valuenow={virtualScrollTop}
+								aria-valuemin={0}
+								aria-valuemax={maxVirtualScroll}
+								aria-orientation="vertical"
+								role={"scrollbar"}
+								aria-label="Scrollbar track"
+								className="absolute right-0 top-0 bottom-0 w-3 bg-accent/20 hover:bg-accent/30 transition-colors cursor-pointer border-0 p-0"
+								onMouseDown={handleScrollbarTrackClick}
+							>
+								{/** biome-ignore lint/a11y/noStaticElementInteractions: necessary */}
+								<div
+									className="scrollbar-thumb absolute right-0 w-3 bg-primary/60 hover:bg-primary/80 cursor-grab active:cursor-grabbing transition-colors"
+									style={{
+										top: `${(virtualScrollTop / maxVirtualScroll) * (100 - Math.max(2, (containerHeight / (totalRows * ROW_HEIGHT)) * 100))}%`,
+										height: `${Math.max(2, (containerHeight / (totalRows * ROW_HEIGHT)) * 100)}%`,
+									}}
+									onMouseDown={handleScrollbarMouseDown}
+								/>
+							</button>
+						)}
 					</div>
 				</ContextMenu.Trigger>
 

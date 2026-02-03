@@ -7,6 +7,7 @@ interface HexRowProps {
 	onByteMouseDown: (i: number) => void;
 	onByteMouseEnter: (i: number) => void;
 	diffSet?: Set<number> | null;
+	changeSet?: Record<number, number>;
 	bytesPerRow: number;
 }
 
@@ -19,6 +20,7 @@ export default function HexRow({
 	onByteMouseDown,
 	onByteMouseEnter,
 	diffSet,
+	changeSet = {},
 	bytesPerRow,
 }: Readonly<HexRowProps>) {
 	const offset = index * bytesPerRow;
@@ -39,6 +41,10 @@ export default function HexRow({
 					const bufferIdx = dataIndex + i;
 					if (bufferIdx < 0 || bufferIdx >= data.length)
 						return <span key={i} className="w-6" />;
+
+					const byte = data[bufferIdx];
+					// Check changeSet for modified value
+					const displayByte = fileIdx in changeSet ? changeSet[fileIdx] : byte;
 
 					return (
 						<button
@@ -61,7 +67,7 @@ export default function HexRow({
 										: "hover:bg-accent hover:text-accent-foreground"
 							}`}
 						>
-							{data[bufferIdx].toString(16).padStart(2, "0").toUpperCase()}
+							{displayByte.toString(16).padStart(2, "0").toUpperCase()}
 						</button>
 					);
 				})}
@@ -75,8 +81,12 @@ export default function HexRow({
 						return <span key={i} />;
 
 					const byte = data[bufferIdx];
+					// Check changeSet for modified value
+					const displayByte = fileIdx in changeSet ? changeSet[fileIdx] : byte;
 					const char =
-						byte >= 32 && byte <= 126 ? String.fromCodePoint(byte) : ".";
+						displayByte >= 32 && displayByte <= 126
+							? String.fromCodePoint(displayByte)
+							: ".";
 
 					return (
 						<span
