@@ -7,6 +7,8 @@ export const THEMES = [
 	"remofer",
 	"furina-ousia",
 	"furina-pneuma",
+	"chaotic-uwu",
+	"soft-uwu",
 ] as const;
 
 export type Theme = (typeof THEMES)[number];
@@ -16,6 +18,8 @@ const customThemes = new Set([
 	"remofer",
 	"furina-ousia",
 	"furina-pneuma",
+	"chaotic-uwu",
+	"soft-uwu",
 ]);
 
 export function useTheme() {

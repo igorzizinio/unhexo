@@ -249,6 +249,49 @@
 		--ring: 65% 0.12 235; /* Blue focus ring */
 	}
 
+	/* Chaotic UwU theme - High contrast vibrant pastels !CHAOS! >w< */
+	[data-theme="chaotic-uwu"] {
+		/* Base - Bright bubblegum pink background */
+		--background: 92% 0.15 340; /* Vibrant pink background */
+		--foreground: 20% 0.1 280; /* Deep purple text for contrast |w| */
+		/* Card - Electric cyan surface */
+		--card: 88% 0.16 210; /* Bright cyan card */
+		--card-foreground: 20% 0.1 280; /* Deep purple text */
+
+		/* Popover - Neon lavender */
+		--popover: 85% 0.18 290; /* Bright lavender */
+		--popover-foreground: 20% 0.1 340; /* Deep magenta text */
+
+		/* Primary - Electric magenta UwU */
+		--primary: 70% 0.25 330; /* Hot magenta */
+		--primary-foreground: 95% 0.05 340; /* Light pink text */
+
+		/* Secondary - Neon cyan */
+		--secondary: 75% 0.2 195; /* Bright cyan */
+		--secondary-foreground: 20% 0.1 280; /* Deep purple */
+
+		/* Muted - Soft yellow */
+		--muted: 90% 0.12 90; /* Pastel yellow */
+		--muted-foreground: 35% 0.08 280; /* Medium purple text */
+
+		/* Accent - Electric lime */
+		--accent: 85% 0.18 130; /* Bright lime green */
+		--accent-foreground: 25% 0.12 150; /* Deep green */
+
+		/* Highlight - Sunny orange */
+		--highlight: 78% 0.16 45; /* Vibrant orange */
+		--highlight-foreground: 20% 0.08 280; /* Deep purple */
+
+		/* Destructive - Hot pink */
+		--destructive: 65% 0.28 350; /* Intense hot pink */
+		--destructive-foreground: 95% 0.05 340; /* Light pink */
+
+		/* Borders & inputs - Purple accent */
+		--border: 70% 0.15 280; /* Medium purple border */
+		--input: 85% 0.14 260; /* Light purple input */
+		--ring: 75% 0.25 320; /* Bright magenta ring */
+	}
+
 	body {
 		@apply bg-background text-foreground antialiased;
 		scrollbar-color: var(--color-border) var(--color-background);
