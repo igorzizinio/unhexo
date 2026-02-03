@@ -34,10 +34,11 @@ function AppContent() {
 
 	// Use the new changeset-based diff algorithm
 	// Only computes diffs when in mosaic mode with exactly 2 tabs
+	// Use "full" strategy to compare entire files, not just changesets
 	const diffSet = useDiff(
-		leftTab && rightTab ? leftTab : null,
-		leftTab && rightTab ? rightTab : null,
-		{ strategy: "changeset" },
+		viewMode === "mosaic" && leftTab && rightTab ? leftTab : null,
+		viewMode === "mosaic" && leftTab && rightTab ? rightTab : null,
+		{ strategy: "full" },
 	);
 
 	// =========================

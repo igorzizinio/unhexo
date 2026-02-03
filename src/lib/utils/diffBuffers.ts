@@ -173,8 +173,16 @@ export async function diffChangeSetsOnly(
 		allChangedIndices.add(idx);
 	}
 
+	console.log(
+		"diffChangeSetsOnly - Changed indices:",
+		allChangedIndices.size,
+		"fileSize:",
+		fileSize,
+	);
+
 	// If no changes, files are identical
 	if (allChangedIndices.size === 0) {
+		console.log("No changes detected, files are identical");
 		return diffs;
 	}
 

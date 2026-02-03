@@ -47,20 +47,25 @@ export function useDiff(
 		const computeDiff = async () => {
 			try {
 				// Open file handles
-				if (leftTab.filePath) {
-					await leftBuffer.openFile(leftTab.filePath);
-				}
-				if (rightTab.filePath) {
-					await rightBuffer.openFile(rightTab.filePath);
-				}
-
-				// Wait a bit for buffers to be ready
-				if (!leftBuffer.isReady || !rightBuffer.isReady) {
+				if (!leftTab.filePath || !rightTab.filePath) {
 					if (!cancelled) {
 						setDiffSet(null);
 					}
 					return;
 				}
+
+				await leftBuffer.openFile(leftTab.filePath);
+				await rightBuffer.openFile(rightTab.filePath);
+
+				// Buffers are ready after opening (openFile is async)
+				console.log(
+					"Computing diff with strategy:",
+					strategy,
+					"Left changeSet:",
+					leftTab.changeSet,
+					"Right changeSet:",
+					rightTab.changeSet,
+				);
 
 				let result: Set<number>;
 
@@ -86,6 +91,7 @@ export function useDiff(
 				}
 
 				if (!cancelled) {
+					console.log("Diff computed, found differences:", result.size);
 					setDiffSet(result);
 				}
 			} catch (error) {
