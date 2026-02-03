@@ -6,6 +6,8 @@ import { useFiles } from "@/lib/context/FileContext";
 import { useDiffInRange } from "@/lib/hooks/useDiff";
 import { useFileBuffer } from "@/lib/hooks/useFileBuffer";
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 interface BufferedHexViewerProps {
 	tabId: string;
 	filePath: string;
@@ -376,6 +378,8 @@ export function BufferedHexViewer({
 					newIndex = Math.max(selectedByte - BYTES_PER_ROW, 0);
 					break;
 				case "PageDown":
+					// we add a little "calm down", to allow the browser full render, and also find the diff
+					await sleep(75);
 					newIndex = Math.min(
 						selectedByte +
 							BYTES_PER_ROW * Math.floor(containerHeight / ROW_HEIGHT),
@@ -383,6 +387,8 @@ export function BufferedHexViewer({
 					);
 					break;
 				case "PageUp":
+					// we add a little "calm down", to allow the browser full render, and also find the diff
+					await sleep(75);
 					newIndex = Math.max(
 						selectedByte -
 							BYTES_PER_ROW * Math.floor(containerHeight / ROW_HEIGHT),

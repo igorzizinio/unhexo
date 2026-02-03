@@ -59,7 +59,7 @@ export default function HexRow({
 							onPointerEnter={(e) =>
 								e.buttons === 1 && onByteMouseEnter(fileIdx)
 							}
-							className={`w-6 h-6 rounded transition-colors ${
+							className={`w-6 h-6 rounded ${
 								isByteSelected(fileIdx)
 									? "bg-primary text-primary-foreground font-semibold"
 									: diffSet?.has(fileIdx)
