@@ -1,7 +1,9 @@
 import { ContextMenu } from "@base-ui/react/context-menu";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import HexRow from "@/lib/components/hex-row";
+import type { Tab } from "@/lib/context/FileContext";
 import { useFiles } from "@/lib/context/FileContext";
+import { useDiffInRange } from "@/lib/hooks/useDiff";
 import { useFileBuffer } from "@/lib/hooks/useFileBuffer";
 
 interface BufferedHexViewerProps {
@@ -11,7 +13,12 @@ interface BufferedHexViewerProps {
 	changeSet: Record<number, number>;
 	isActive?: boolean;
 	onActivate?: () => void;
-	diffSet?: Set<number> | null;
+	compareWithTab?: Tab;
+	diffNavigation?: {
+		findNextDiff: (fromOffset: number) => Promise<number | null>;
+		findPrevDiff: (fromOffset: number) => Promise<number | null>;
+		isSearching: boolean;
+	};
 	className?: string;
 	version?: number;
 }
@@ -28,7 +35,8 @@ export function BufferedHexViewer({
 	changeSet,
 	isActive = false,
 	onActivate,
-	diffSet,
+	compareWithTab,
+	diffNavigation,
 	version = 0,
 	className,
 }: Readonly<BufferedHexViewerProps>) {
@@ -52,6 +60,24 @@ export function BufferedHexViewer({
 	const [isSelecting, setIsSelecting] = useState(false);
 
 	const [hexNibble, setHexNibble] = useState<"high" | "low">("high");
+
+	// Compute diffs only for the visible range when comparing
+	const currentTab = compareWithTab
+		? ({
+				id: tabId,
+				filePath,
+				fileSize,
+				changeSet,
+			} as Tab)
+		: null;
+
+	const visibleLength = visibleBuffer.length;
+	const diffSet = useDiffInRange(
+		currentTab,
+		compareWithTab ?? null,
+		visibleStartOffset,
+		visibleLength,
+	);
 
 	// Open file buffer when component mounts or filePath changes
 	useEffect(() => {
@@ -214,6 +240,49 @@ export function BufferedHexViewer({
 	}, []);
 
 	// =============================
+	// Diff Navigation
+	// =============================
+
+	const scrollToOffset = useCallback((offset: number) => {
+		const rowIndex = Math.floor(offset / BYTES_PER_ROW);
+		const scrollTop = rowIndex * ROW_HEIGHT;
+		setVirtualScrollTop(scrollTop);
+		setSelectedByte(offset);
+		setSelectionStart(offset);
+		setSelectionEnd(offset);
+		setHexNibble("high");
+	}, []);
+
+	const handleNextDiff = useCallback(async () => {
+		if (!diffNavigation) return;
+
+		const fromOffset =
+			selectedByte === null ? visibleStartOffset : selectedByte + 1;
+		const result = await diffNavigation.findNextDiff(fromOffset);
+
+		if (result !== null) {
+			scrollToOffset(result);
+		}
+	}, [diffNavigation, selectedByte, visibleStartOffset, scrollToOffset]);
+
+	const handlePrevDiff = useCallback(async () => {
+		if (!diffNavigation) return;
+
+		const fromOffset = selectedByte ?? visibleStartOffset + visibleLength;
+		const result = await diffNavigation.findPrevDiff(fromOffset);
+
+		if (result !== null) {
+			scrollToOffset(result);
+		}
+	}, [
+		diffNavigation,
+		selectedByte,
+		visibleStartOffset,
+		visibleLength,
+		scrollToOffset,
+	]);
+
+	// =============================
 	// Keyboard
 	// =============================
 
@@ -232,6 +301,17 @@ export function BufferedHexViewer({
 						setSelectionEnd(fileSize - 1);
 						return;
 				}
+			}
+
+			// Diff navigation shortcuts
+			if (diffNavigation && e.key === "F6") {
+				e.preventDefault();
+				if (e.shiftKey) {
+					await handlePrevDiff();
+				} else {
+					await handleNextDiff();
+				}
+				return;
 			}
 
 			if (e.altKey) {
@@ -283,28 +363,6 @@ export function BufferedHexViewer({
 			let newIndex = selectedByte;
 
 			switch (e.key) {
-				case "F6": {
-					e.preventDefault();
-
-					if (e.shiftKey) {
-						const prevDiffIndex = Array.from(diffSet || new Set<number>())
-							.filter((i) => i < selectedByte)
-							.sort((a, b) => b - a)[0];
-						if (prevDiffIndex !== undefined) {
-							newIndex = prevDiffIndex;
-						}
-						break;
-					}
-
-					const nextDiffIndex = Array.from(diffSet || new Set<number>())
-						.filter((i) => i > selectedByte)
-						.sort((a, b) => a - b)[0];
-					if (nextDiffIndex !== undefined) {
-						newIndex = nextDiffIndex;
-					}
-					break;
-				}
-
 				case "ArrowRight":
 					newIndex = Math.min(selectedByte + 1, fileSize - 1);
 					break;
@@ -370,6 +428,9 @@ export function BufferedHexViewer({
 			tabId,
 			selectionStart,
 			containerHeight,
+			diffNavigation,
+			handleNextDiff,
+			handlePrevDiff,
 		],
 	);
 

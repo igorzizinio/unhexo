@@ -90,6 +90,258 @@ fn delete_temp_file(path: String) -> Result<(), String> {
     Ok(())
 }
 
+/// Returns byte offsets that differ within the specified range
+#[tauri::command]
+fn diff_in_range(
+    path_left: String,
+    path_right: String,
+    offset: u64,
+    length: usize,
+    state: State<FileHandles>,
+) -> Result<Vec<u64>, String> {
+    let mut handles = state.handles.lock().unwrap();
+    
+    // Seek left file
+    if let Some(file) = handles.get_mut(&path_left) {
+        file.seek(SeekFrom::Start(offset))
+            .map_err(|e| e.to_string())?;
+    } else {
+        return Err("Left file handle not found".to_string());
+    }
+    
+    // Seek right file
+    if let Some(file) = handles.get_mut(&path_right) {
+        file.seek(SeekFrom::Start(offset))
+            .map_err(|e| e.to_string())?;
+    } else {
+        return Err("Right file handle not found".to_string());
+    }
+
+    let mut diffs: Vec<u64> = vec![];
+    let buffer_size = 4096;
+    let mut pos = offset;
+    let end = offset + length as u64;
+    let mut buffer_left = vec![0u8; buffer_size];
+    let mut buffer_right = vec![0u8; buffer_size];
+
+    while pos < end {
+        let to_read = ((end - pos).min(buffer_size as u64)) as usize;
+
+        // Read from left file
+        let bytes_read_left = {
+            let file_left = handles
+                .get_mut(&path_left)
+                .ok_or("Left file handle not found")?;
+            file_left
+                .read(&mut buffer_left[..to_read])
+                .map_err(|e| e.to_string())?
+        };
+
+        // Read from right file
+        let bytes_read_right = {
+            let file_right = handles
+                .get_mut(&path_right)
+                .ok_or("Right file handle not found")?;
+            file_right
+                .read(&mut buffer_right[..to_read])
+                .map_err(|e| e.to_string())?
+        };
+
+        let min_bytes = bytes_read_left.min(bytes_read_right);
+        
+        for i in 0..min_bytes {
+            if buffer_left[i] != buffer_right[i] {
+                diffs.push(pos + i as u64);
+            }
+        }
+
+        // Handle case where files have different lengths
+        if bytes_read_left != bytes_read_right {
+            let max_bytes = bytes_read_left.max(bytes_read_right);
+            for i in min_bytes..max_bytes {
+                diffs.push(pos + i as u64);
+            }
+        }
+
+        pos += to_read as u64;
+        
+        if bytes_read_left == 0 && bytes_read_right == 0 {
+            break;
+        }
+    }
+
+    Ok(diffs)
+}
+
+/// Finds the next byte offset that differs, starting from the given offset
+#[tauri::command]
+fn find_next_diff(
+    path_left: String,
+    path_right: String,
+    from_offset: u64,
+    state: State<FileHandles>,
+) -> Result<Option<u64>, String> {
+    let mut handles = state.handles.lock().unwrap();
+    
+    // Seek both files to the starting offset
+    if let Some(file) = handles.get_mut(&path_left) {
+        file.seek(SeekFrom::Start(from_offset))
+            .map_err(|e| e.to_string())?;
+    } else {
+        return Err("Left file handle not found".to_string());
+    }
+    
+    if let Some(file) = handles.get_mut(&path_right) {
+        file.seek(SeekFrom::Start(from_offset))
+            .map_err(|e| e.to_string())?;
+    } else {
+        return Err("Right file handle not found".to_string());
+    }
+
+    let buffer_size = 4096;
+    let mut pos = from_offset;
+    let mut buffer_left = vec![0u8; buffer_size];
+    let mut buffer_right = vec![0u8; buffer_size];
+
+    loop {
+        // Read from left file
+        let bytes_read_left = {
+            let file_left = handles
+                .get_mut(&path_left)
+                .ok_or("Left file handle not found")?;
+            file_left
+                .read(&mut buffer_left)
+                .map_err(|e| e.to_string())?
+        };
+
+        // Read from right file
+        let bytes_read_right = {
+            let file_right = handles
+                .get_mut(&path_right)
+                .ok_or("Right file handle not found")?;
+            file_right
+                .read(&mut buffer_right)
+                .map_err(|e| e.to_string())?
+        };
+
+        if bytes_read_left == 0 && bytes_read_right == 0 {
+            break; // End of both files
+        }
+
+        let max_bytes = bytes_read_left.max(bytes_read_right);
+
+        for i in 0..max_bytes {
+            let byte_left = if i < bytes_read_left {
+                buffer_left[i]
+            } else {
+                0
+            };
+            let byte_right = if i < bytes_read_right {
+                buffer_right[i]
+            } else {
+                0
+            };
+
+            if byte_left != byte_right {
+                return Ok(Some(pos + i as u64));
+            }
+        }
+
+        pos += max_bytes as u64;
+    }
+
+    Ok(None)
+}
+
+/// Finds the previous byte offset that differs, before the given offset
+#[tauri::command]
+fn find_prev_diff(
+    path_left: String,
+    path_right: String,
+    from_offset: u64,
+    state: State<FileHandles>,
+) -> Result<Option<u64>, String> {
+    if from_offset == 0 {
+        return Ok(None);
+    }
+
+    let mut handles = state.handles.lock().unwrap();
+    
+    let buffer_size = 4096;
+    let mut buffer_left = vec![0u8; buffer_size];
+    let mut buffer_right = vec![0u8; buffer_size];
+
+    // Search backwards in chunks
+    let mut search_end = from_offset;
+    
+    while search_end > 0 {
+        let chunk_start = if search_end > buffer_size as u64 {
+            search_end - buffer_size as u64
+        } else {
+            0
+        };
+        let chunk_len = (search_end - chunk_start) as usize;
+
+        // Seek and read left file
+        if let Some(file) = handles.get_mut(&path_left) {
+            file.seek(SeekFrom::Start(chunk_start))
+                .map_err(|e| e.to_string())?;
+        } else {
+            return Err("Left file handle not found".to_string());
+        }
+        
+        let bytes_read_left = {
+            let file_left = handles
+                .get_mut(&path_left)
+                .ok_or("Left file handle not found")?;
+            file_left
+                .read(&mut buffer_left[..chunk_len])
+                .map_err(|e| e.to_string())?
+        };
+
+        // Seek and read right file
+        if let Some(file) = handles.get_mut(&path_right) {
+            file.seek(SeekFrom::Start(chunk_start))
+                .map_err(|e| e.to_string())?;
+        } else {
+            return Err("Right file handle not found".to_string());
+        }
+        
+        let bytes_read_right = {
+            let file_right = handles
+                .get_mut(&path_right)
+                .ok_or("Right file handle not found")?;
+            file_right
+                .read(&mut buffer_right[..chunk_len])
+                .map_err(|e| e.to_string())?
+        };
+
+        let max_bytes = bytes_read_left.max(bytes_read_right);
+
+        // Search backwards within this chunk
+        for i in (0..max_bytes).rev() {
+            let byte_left = if i < bytes_read_left {
+                buffer_left[i]
+            } else {
+                0
+            };
+            let byte_right = if i < bytes_read_right {
+                buffer_right[i]
+            } else {
+                0
+            };
+
+            if byte_left != byte_right {
+                return Ok(Some(chunk_start + i as u64));
+            }
+        }
+
+        search_end = chunk_start;
+    }
+
+    Ok(None)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -106,7 +358,10 @@ pub fn run() {
             read_file_chunk,
             close_file_handle,
             create_temp_file,
-            delete_temp_file
+            delete_temp_file,
+            diff_in_range,
+            find_next_diff,
+            find_prev_diff,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

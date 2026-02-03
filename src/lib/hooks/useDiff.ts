@@ -1,43 +1,26 @@
-import { useEffect, useState } from "preact/hooks";
+import { invoke } from "@tauri-apps/api/core";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import type { Tab } from "../context/FileContext";
-import {
-	diffChangeSetsOnly,
-	diffWithChangeSetChunked,
-} from "../utils/diffBuffers";
-import { useFileBuffer } from "./useFileBuffer";
-
-interface DiffHookOptions {
-	/**
-	 * Strategy for computing diffs:
-	 * - "full": Compare entire files chunk by chunk (slower but thorough)
-	 * - "changeset": Only compare changed regions (faster for sparse edits)
-	 */
-	strategy?: "full" | "changeset";
-
-	/**
-	 * Size of chunks to read when comparing files (default: 64KB)
-	 */
-	chunkSize?: number;
-}
 
 /**
- * Hook to compute differences between two file tabs using the new changeset-based architecture.
- * This avoids loading entire files into memory.
+ * Hook to compute differences between two file tabs in a specific range.
+ * This only diffs the visible portion, making it fast even for large files.
  */
-export function useDiff(
+export function useDiffInRange(
 	leftTab: Tab | null,
 	rightTab: Tab | null,
-	options: DiffHookOptions = {},
+	offset: number,
+	length: number,
 ): Set<number> | null {
-	const { strategy = "changeset", chunkSize = 64 * 1024 } = options;
-
 	const [diffSet, setDiffSet] = useState<Set<number> | null>(null);
-
-	const leftBuffer = useFileBuffer();
-	const rightBuffer = useFileBuffer();
 
 	useEffect(() => {
 		if (!leftTab || !rightTab) {
+			setDiffSet(null);
+			return;
+		}
+
+		if (!leftTab.filePath || !rightTab.filePath) {
 			setDiffSet(null);
 			return;
 		}
@@ -46,52 +29,20 @@ export function useDiff(
 
 		const computeDiff = async () => {
 			try {
-				// Open file handles
-				if (!leftTab.filePath || !rightTab.filePath) {
-					if (!cancelled) {
-						setDiffSet(null);
-					}
-					return;
-				}
+				// Ensure both file handles are open in Rust
+				await invoke("open_file_handle", { path: leftTab.filePath });
+				await invoke("open_file_handle", { path: rightTab.filePath });
 
-				await leftBuffer.openFile(leftTab.filePath);
-				await rightBuffer.openFile(rightTab.filePath);
-
-				// Buffers are ready after opening (openFile is async)
-				console.log(
-					"Computing diff with strategy:",
-					strategy,
-					"Left changeSet:",
-					leftTab.changeSet,
-					"Right changeSet:",
-					rightTab.changeSet,
-				);
-
-				let result: Set<number>;
-
-				if (strategy === "changeset") {
-					// Fast diff - only check changed regions
-					result = await diffChangeSetsOnly(
-						(offset, length) => leftBuffer.readBytes(offset, length),
-						leftTab.changeSet,
-						(offset, length) => rightBuffer.readBytes(offset, length),
-						rightTab.changeSet,
-						leftTab.fileSize,
-					);
-				} else {
-					// Full diff - compare all bytes
-					result = await diffWithChangeSetChunked(
-						(offset, length) => leftBuffer.readBytes(offset, length),
-						leftTab.changeSet,
-						(offset, length) => rightBuffer.readBytes(offset, length),
-						rightTab.changeSet,
-						leftTab.fileSize,
-						chunkSize,
-					);
-				}
+				// Call the Rust diff_in_range command for only the visible range
+				const differences = await invoke<number[]>("diff_in_range", {
+					pathLeft: leftTab.filePath,
+					pathRight: rightTab.filePath,
+					offset,
+					length,
+				});
 
 				if (!cancelled) {
-					console.log("Diff computed, found differences:", result.size);
+					const result = new Set(differences);
 					setDiffSet(result);
 				}
 			} catch (error) {
@@ -99,8 +50,6 @@ export function useDiff(
 				if (!cancelled) {
 					setDiffSet(null);
 				}
-			} finally {
-				// Cleanup if needed
 			}
 		};
 
@@ -108,20 +57,86 @@ export function useDiff(
 
 		return () => {
 			cancelled = true;
-			// Cleanup file handles
-			leftBuffer.closeFile();
-			rightBuffer.closeFile();
 		};
 	}, [
 		leftTab?.id,
-		leftTab?.fileSize,
-		leftTab?.changeSet,
+		leftTab?.filePath,
 		rightTab?.id,
-		rightTab?.fileSize,
-		rightTab?.changeSet,
-		strategy,
-		chunkSize,
+		rightTab?.filePath,
+		offset,
+		length,
 	]);
 
 	return diffSet;
+}
+
+/**
+ * Hook that provides diff navigation functions
+ */
+export function useDiffNavigation(leftTab: Tab | null, rightTab: Tab | null) {
+	const [isSearching, setIsSearching] = useState(false);
+
+	const findNextDiff = useCallback(
+		async (fromOffset: number): Promise<number | null> => {
+			if (!leftTab?.filePath || !rightTab?.filePath) {
+				return null;
+			}
+
+			setIsSearching(true);
+			try {
+				// Ensure both file handles are open
+				await invoke("open_file_handle", { path: leftTab.filePath });
+				await invoke("open_file_handle", { path: rightTab.filePath });
+
+				const result = await invoke<number | null>("find_next_diff", {
+					pathLeft: leftTab.filePath,
+					pathRight: rightTab.filePath,
+					fromOffset,
+				});
+
+				return result;
+			} catch (error) {
+				console.error("Error finding next diff:", error);
+				return null;
+			} finally {
+				setIsSearching(false);
+			}
+		},
+		[leftTab?.filePath, rightTab?.filePath],
+	);
+
+	const findPrevDiff = useCallback(
+		async (fromOffset: number): Promise<number | null> => {
+			if (!leftTab?.filePath || !rightTab?.filePath) {
+				return null;
+			}
+
+			setIsSearching(true);
+			try {
+				// Ensure both file handles are open
+				await invoke("open_file_handle", { path: leftTab.filePath });
+				await invoke("open_file_handle", { path: rightTab.filePath });
+
+				const result = await invoke<number | null>("find_prev_diff", {
+					pathLeft: leftTab.filePath,
+					pathRight: rightTab.filePath,
+					fromOffset,
+				});
+
+				return result;
+			} catch (error) {
+				console.error("Error finding previous diff:", error);
+				return null;
+			} finally {
+				setIsSearching(false);
+			}
+		},
+		[leftTab?.filePath, rightTab?.filePath],
+	);
+
+	return {
+		findNextDiff,
+		findPrevDiff,
+		isSearching,
+	};
 }

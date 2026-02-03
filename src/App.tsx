@@ -4,26 +4,26 @@ import { Mosaic } from "react-mosaic-component";
 import StatusBar from "./lib/components/status-bar";
 import { Tabs } from "./lib/components/tabs";
 import Titlebar from "./lib/components/titlebar";
-import { FileProvider, useFiles } from "./lib/context/FileContext";
-import { useDiff } from "./lib/hooks/useDiff";
+import { FileProvider, type Tab, useFiles } from "./lib/context/FileContext";
+import { useDiffNavigation } from "./lib/hooks/useDiff";
 import type { EditorWindow, ViewMode } from "./types";
 
 //! DO NO REMOVE: this is necessary for the mosaic works
 import "react-mosaic-component/react-mosaic-component.css";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { BufferedHexViewer } from "./lib/components/hex-viewer";
+import { usePersistedState } from "./lib/hooks/usePersistedState";
 
 function AppContent() {
 	const { tabs, activeTabId, setActiveTab, closeTab, activeTab, saveTab } =
 		useFiles();
+	const [zoomLevel, setZoomLevel] = usePersistedState("windowZoomLevel", 1);
 
 	const [viewMode, setViewMode] = useState<ViewMode>("tabs");
 	const [windows, setWindows] = useState<Record<string, EditorWindow>>({});
 	const [mosaicValue, setMosaicValue] = useState<
 		MosaicNode<string> | string | null
 	>(null);
-
-	const [zoomLevel, setZoomLevel] = useState(1);
 
 	// =========================
 	// Comparação (somente 2 abas)
@@ -32,13 +32,10 @@ function AppContent() {
 	const leftTab = tabs[0] ?? null;
 	const rightTab = tabs[1] ?? null;
 
-	// Use the new changeset-based diff algorithm
-	// Only computes diffs when in mosaic mode with exactly 2 tabs
-	// Use "full" strategy to compare entire files, not just changesets
-	const diffSet = useDiff(
+	// Diff navigation for mosaic mode with 2 tabs
+	const diffNav = useDiffNavigation(
 		viewMode === "mosaic" && leftTab && rightTab ? leftTab : null,
 		viewMode === "mosaic" && leftTab && rightTab ? rightTab : null,
-		{ strategy: "full" },
 	);
 
 	// =========================
@@ -178,7 +175,6 @@ function AppContent() {
 							filePath={activeTab.filePath}
 							fileSize={activeTab.fileSize}
 							changeSet={activeTab.changeSet}
-							diffSet={null}
 							isActive
 							onActivate={() => setActiveTab(activeTab.id)}
 							version={activeTab.version}
@@ -205,16 +201,23 @@ function AppContent() {
 
 							if (!tab) return null;
 
+							// Determine which tab to compare with
+							let compareWith: Tab | undefined;
+							if (isComparable) {
+								compareWith = tab.id === leftTab.id ? rightTab : leftTab;
+							}
+
 							return tab.filePath ? (
 								<BufferedHexViewer
 									tabId={tab.id}
 									filePath={tab.filePath}
 									fileSize={tab.fileSize}
 									changeSet={tab.changeSet}
-									diffSet={isComparable ? diffSet : null}
 									isActive={tab.id === activeTabId}
 									onActivate={() => setActiveTab(tab.id)}
 									version={tab.version}
+									compareWithTab={compareWith}
+									diffNavigation={isComparable ? diffNav : undefined}
 								/>
 							) : null;
 						}}
