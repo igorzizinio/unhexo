@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
 import { exit } from "@tauri-apps/plugin-process";
+import { CheckIcon } from "lucide-preact";
 import { useState } from "preact/hooks";
 import About from "@/lib/components/about";
 import {
@@ -118,12 +119,23 @@ const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
 					<Separator className="my-1 h-px w-full bg-border" />
 					<MenubarSubmenu label="Theme">
 						{THEMES.map((t) => (
-							<MenubarItem key={t} onClick={() => setTheme(t)}>
-								{t
-									.split("-")
-									.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-									.join(" ")}
-								{theme === t && " ✓"}
+							<MenubarItem
+								className="flex justify-between"
+								key={t}
+								aria-checked={theme === t}
+								onClick={() => setTheme(t)}
+							>
+								<span>
+									{t
+										.split("-")
+										.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+										.join(" ")}
+								</span>
+
+								<CheckIcon
+									size={14}
+									className={theme === t ? "visible" : "invisible"}
+								/>
 							</MenubarItem>
 						))}
 					</MenubarSubmenu>

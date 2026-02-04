@@ -1,6 +1,6 @@
 import { Menu } from "@base-ui/react/menu";
 import { ChevronRightIcon } from "lucide-preact";
-import type { ComponentChildren } from "preact";
+import type { ComponentChildren, ComponentProps } from "preact";
 
 const MENU_ITEM_CLASS =
 	"flex cursor-default items-center justify-between gap-4 px-4 py-2 text-sm leading-4 outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors duration-150 rounded-sm mx-1 data-[popup-open]:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50";
@@ -32,13 +32,17 @@ export const MenubarMenu = ({ label, children }: MenubarMenuProps) => (
 	</Menu.Root>
 );
 
-interface MenubarItemProps {
-	children: ComponentChildren;
-	onClick?: () => void;
-}
-
-export const MenubarItem = ({ children, onClick }: MenubarItemProps) => (
-	<Menu.Item onClick={onClick} className={MENU_ITEM_CLASS}>
+export const MenubarItem = ({
+	children,
+	onClick,
+	className,
+	...props
+}: ComponentProps<typeof Menu.Item>) => (
+	<Menu.Item
+		onClick={onClick}
+		className={`${MENU_ITEM_CLASS} ${className}`}
+		{...props}
+	>
 		{children}
 	</Menu.Item>
 );
