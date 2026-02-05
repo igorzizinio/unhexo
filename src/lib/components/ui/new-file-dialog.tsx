@@ -69,7 +69,10 @@ export const NewFileDialog = ({
 							defaultValue={2048}
 						>
 							<NumberField.ScrubArea className="cursor-ew-resize">
-								<label htmlFor={newFileSizeId} className="text-sm font-medium">
+								<label
+									htmlFor={newFileSizeId}
+									className="text-sm font-medium cursor-ew-resize"
+								>
 									File Size (bytes)
 								</label>
 								<NumberField.ScrubAreaCursor className="drop-shadow-[0_1px_1px_#0008] filter">
