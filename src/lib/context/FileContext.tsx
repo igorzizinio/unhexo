@@ -29,7 +29,6 @@ interface FileContextType {
 	activeTab: Tab | null;
 	openFile: (file: Partial<Tab> & { data?: Uint8Array }) => void;
 	closeTab: (id: string) => Promise<void>;
-	closeAllTabs: () => Promise<void>;
 	setActiveTab: (id: string) => void;
 	saveTab: (id: string) => Promise<void>;
 	updateChangeSet: (id: string, offset: number, value: number) => void;
@@ -206,12 +205,6 @@ export function FileProvider({
 		}
 	};
 
-	const closeAllTabs = async () => {
-		for (const tab of tabs) {
-			await closeTab(tab.id);
-		}
-	};
-
 	const value = useMemo(
 		() => ({
 			tabs,
@@ -223,7 +216,6 @@ export function FileProvider({
 			saveTab,
 			updateChangeSet,
 			clearChangeSet,
-			closeAllTabs,
 		}),
 		[tabs, activeTabId, activeTab],
 	);

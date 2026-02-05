@@ -1,6 +1,5 @@
 import { ContextMenu, ScrollArea } from "@base-ui/react";
 import { XIcon } from "lucide-preact";
-import { useEffect, useState } from "preact/hooks";
 import type { Tab } from "@/lib/context/FileContext";
 
 interface TabsProps {
@@ -8,16 +7,9 @@ interface TabsProps {
 	activeTabId: string | null;
 	onTabClick: (id: string) => void;
 	onTabClose: (id: string) => void;
-	onTabCloseAll: () => void;
 }
 
-export function Tabs({
-	tabs,
-	activeTabId,
-	onTabClick,
-	onTabClose,
-	onTabCloseAll,
-}: TabsProps) {
+export function Tabs({ tabs, activeTabId, onTabClick, onTabClose }: TabsProps) {
 	if (tabs.length === 0) {
 		return null;
 	}
@@ -26,9 +18,6 @@ export function Tabs({
 		onTabClose(tabId);
 	};
 
-	const handleCloseAll = () => {
-		onTabCloseAll();
-	};
 	return (
 		<ContextMenu.Root>
 			<ContextMenu.Trigger>
@@ -51,14 +40,14 @@ export function Tabs({
 											tabIndex={isActive ? 0 : -1}
 											title={tab.filePath ?? undefined}
 											className={`
-								flex items-center justify-between gap-2 px-3 py-2 text-sm cursor-pointer border-b-2 min-w-28 w-46 text-ellipsis overflow-hidden
-								select-none
-								${
-									isActive
-										? "border-primary bg-background text-foreground"
-										: "border-transparent hover:bg-accent text-muted-foreground"
-								}
-							`}
+												flex items-center justify-between gap-2 px-3 py-2 text-sm cursor-pointer border-b-2 min-w-28 w-46 text-ellipsis overflow-hidden
+												select-none
+												${
+													isActive
+														? "border-primary bg-background text-foreground"
+														: "border-transparent hover:bg-accent text-muted-foreground"
+												}
+											`}
 											onClick={() => onTabClick(tab.id)}
 											onMouseDown={(e) => {
 												// botão do meio do mouse
@@ -90,9 +79,9 @@ export function Tabs({
 													onTabClose(tab.id);
 												}}
 												className={`
-									rounded p-0.5
-									${isActive ? "hover:bg-accent" : "hover:bg-primary-foreground"}
-								`}
+													rounded p-0.5
+													${isActive ? "hover:bg-accent" : "hover:bg-primary-foreground"}
+												`}
 											>
 												<XIcon size={14} />
 											</button>
