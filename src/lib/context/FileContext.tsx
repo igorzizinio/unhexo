@@ -28,7 +28,8 @@ interface FileContextType {
 	activeTabId: string | null;
 	activeTab: Tab | null;
 	openFile: (file: Partial<Tab> & { data?: Uint8Array }) => void;
-	closeTab: (id: string) => void;
+	closeTab: (id: string) => Promise<void>;
+	closeAllTabs: () => Promise<void>;
 	setActiveTab: (id: string) => void;
 	saveTab: (id: string) => Promise<void>;
 	updateChangeSet: (id: string, offset: number, value: number) => void;
@@ -81,14 +82,14 @@ export function FileProvider({
 		}
 	};
 
-	const closeTab = (id: string) => {
+	const closeTab = async (id: string) => {
 		const index = tabs.findIndex((tab) => tab.id === id);
 		const tab = tabs[index];
 		const filtered = tabs.filter((tab) => tab.id !== id);
 
 		// Delete temp file if it exists
 		if (tab?.isTempFile && tab.filePath) {
-			invoke("delete_temp_file", { path: tab.filePath }).catch((err) => {
+			await invoke("delete_temp_file", { path: tab.filePath }).catch((err) => {
 				console.error("Failed to delete temp file:", err);
 			});
 		}
@@ -205,6 +206,12 @@ export function FileProvider({
 		}
 	};
 
+	const closeAllTabs = async () => {
+		for (const tab of tabs) {
+			await closeTab(tab.id);
+		}
+	};
+
 	const value = useMemo(
 		() => ({
 			tabs,
@@ -216,6 +223,7 @@ export function FileProvider({
 			saveTab,
 			updateChangeSet,
 			clearChangeSet,
+			closeAllTabs,
 		}),
 		[tabs, activeTabId, activeTab],
 	);

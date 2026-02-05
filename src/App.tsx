@@ -15,8 +15,15 @@ import { BufferedHexViewer } from "./lib/components/hex-viewer";
 import { usePersistedState } from "./lib/hooks/usePersistedState";
 
 function AppContent() {
-	const { tabs, activeTabId, setActiveTab, closeTab, activeTab, saveTab } =
-		useFiles();
+	const {
+		tabs,
+		activeTabId,
+		setActiveTab,
+		closeTab,
+		closeAllTabs,
+		activeTab,
+		saveTab,
+	} = useFiles();
 	const [zoomLevel, setZoomLevel] = usePersistedState("windowZoomLevel", 1);
 
 	const [viewMode, setViewMode] = useState<ViewMode>("tabs");
@@ -162,6 +169,7 @@ function AppContent() {
 				activeTabId={activeTabId}
 				onTabClick={setActiveTab}
 				onTabClose={closeTab}
+				onTabCloseAll={closeAllTabs}
 			/>
 
 			<main
