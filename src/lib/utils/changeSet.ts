@@ -12,23 +12,23 @@
  * @returns Uint8Array containing the modified file data
  */
 export async function applyChangeSet(
-	readBytes: (offset: number, length: number) => Promise<Uint8Array>,
-	fileSize: number,
-	changeSet: Record<number, number>,
+  readBytes: (offset: number, length: number) => Promise<Uint8Array>,
+  fileSize: number,
+  changeSet: Record<number, number>,
 ): Promise<Uint8Array> {
-	// Read the entire file
-	const data = await readBytes(0, fileSize);
+  // Read the entire file
+  const data = await readBytes(0, fileSize);
 
-	// Apply all changes
-	for (const [offset, value] of Object.entries(changeSet).map(
-		([k, v]) => [Number(k), v] as const,
-	)) {
-		if (offset < data.length) {
-			data[offset] = value;
-		}
-	}
+  // Apply all changes
+  for (const [offset, value] of Object.entries(changeSet).map(
+    ([k, v]) => [Number(k), v] as const,
+  )) {
+    if (offset < data.length) {
+      data[offset] = value;
+    }
+  }
 
-	return data;
+  return data;
 }
 
 /**
@@ -42,32 +42,32 @@ export async function applyChangeSet(
  * @returns Uint8Array containing the modified file data
  */
 export async function applyChangeSetChunked(
-	readBytes: (offset: number, length: number) => Promise<Uint8Array>,
-	fileSize: number,
-	changeSet: Record<number, number>,
-	chunkSize = 1024 * 1024, // 1MB chunks
+  readBytes: (offset: number, length: number) => Promise<Uint8Array>,
+  fileSize: number,
+  changeSet: Record<number, number>,
+  chunkSize = 1024 * 1024, // 1MB chunks
 ): Promise<Uint8Array> {
-	const result = new Uint8Array(fileSize);
+  const result = new Uint8Array(fileSize);
 
-	// Process file in chunks
-	for (let offset = 0; offset < fileSize; offset += chunkSize) {
-		const length = Math.min(chunkSize, fileSize - offset);
-		const chunk = await readBytes(offset, length);
+  // Process file in chunks
+  for (let offset = 0; offset < fileSize; offset += chunkSize) {
+    const length = Math.min(chunkSize, fileSize - offset);
+    const chunk = await readBytes(offset, length);
 
-		// Copy chunk to result
-		result.set(chunk, offset);
-	}
+    // Copy chunk to result
+    result.set(chunk, offset);
+  }
 
-	// Apply all changes
-	for (const [offset, value] of Object.entries(changeSet).map(
-		([k, v]) => [Number(k), v] as const,
-	)) {
-		if (offset < result.length) {
-			result[offset] = value;
-		}
-	}
+  // Apply all changes
+  for (const [offset, value] of Object.entries(changeSet).map(
+    ([k, v]) => [Number(k), v] as const,
+  )) {
+    if (offset < result.length) {
+      result[offset] = value;
+    }
+  }
 
-	return result;
+  return result;
 }
 
 /**
@@ -79,14 +79,14 @@ export async function applyChangeSetChunked(
  * @returns The byte value (from changeSet if modified, otherwise from file)
  */
 export async function getByteValue(
-	readByte: (offset: number) => Promise<number>,
-	offset: number,
-	changeSet: Record<number, number>,
+  readByte: (offset: number) => Promise<number>,
+  offset: number,
+  changeSet: Record<number, number>,
 ): Promise<number> {
-	if (offset in changeSet) {
-		return changeSet[offset];
-	}
-	return readByte(offset);
+  if (offset in changeSet) {
+    return changeSet[offset];
+  }
+  return readByte(offset);
 }
 
 /**
@@ -96,7 +96,7 @@ export async function getByteValue(
  * @returns true if there are unsaved changes
  */
 export function hasUnsavedChanges(changeSet: Record<number, number>): boolean {
-	return Object.keys(changeSet).length > 0;
+  return Object.keys(changeSet).length > 0;
 }
 
 /**
@@ -105,5 +105,5 @@ export function hasUnsavedChanges(changeSet: Record<number, number>): boolean {
  * @returns Empty changeSet
  */
 export function clearChangeSet(): Record<number, number> {
-	return {};
+  return {};
 }

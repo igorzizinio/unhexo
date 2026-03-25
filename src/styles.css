@@ -1,337 +1,337 @@
 @import "tailwindcss";
 
 @theme {
-	--color-background: oklch(var(--background));
-	--color-foreground: oklch(var(--foreground));
-	--color-card: oklch(var(--card));
-	--color-card-foreground: oklch(var(--card-foreground));
-	--color-popover: oklch(var(--popover));
-	--color-popover-foreground: oklch(var(--popover-foreground));
-	--color-primary: oklch(var(--primary));
-	--color-primary-foreground: oklch(var(--primary-foreground));
-	--color-secondary: oklch(var(--secondary));
-	--color-secondary-foreground: oklch(var(--secondary-foreground));
-	--color-muted: oklch(var(--muted));
-	--color-muted-foreground: oklch(var(--muted-foreground));
-	--color-accent: oklch(var(--accent));
-	--color-accent-foreground: oklch(var(--accent-foreground));
-	--color-destructive: oklch(var(--destructive));
-	--color-destructive-foreground: oklch(var(--destructive-foreground));
-	--color-border: oklch(var(--border));
-	--color-input: oklch(var(--input));
-	--color-ring: oklch(var(--ring));
-	--color-highlight: oklch(var(--highlight));
-	--color-highlight-foreground: oklch(var(--highlight-foreground));
+  --color-background: oklch(var(--background));
+  --color-foreground: oklch(var(--foreground));
+  --color-card: oklch(var(--card));
+  --color-card-foreground: oklch(var(--card-foreground));
+  --color-popover: oklch(var(--popover));
+  --color-popover-foreground: oklch(var(--popover-foreground));
+  --color-primary: oklch(var(--primary));
+  --color-primary-foreground: oklch(var(--primary-foreground));
+  --color-secondary: oklch(var(--secondary));
+  --color-secondary-foreground: oklch(var(--secondary-foreground));
+  --color-muted: oklch(var(--muted));
+  --color-muted-foreground: oklch(var(--muted-foreground));
+  --color-accent: oklch(var(--accent));
+  --color-accent-foreground: oklch(var(--accent-foreground));
+  --color-destructive: oklch(var(--destructive));
+  --color-destructive-foreground: oklch(var(--destructive-foreground));
+  --color-border: oklch(var(--border));
+  --color-input: oklch(var(--input));
+  --color-ring: oklch(var(--ring));
+  --color-highlight: oklch(var(--highlight));
+  --color-highlight-foreground: oklch(var(--highlight-foreground));
 }
 
 @layer base {
-	:root {
-		--background: 100% 0 0;
-		--foreground: 10% 0 0;
-		--card: 100% 0 0;
-		--card-foreground: 10% 0 0;
-		--popover: 100% 0 0;
-		--popover-foreground: 10% 0 0;
-		--primary: 47% 0.12 255;
-		--primary-foreground: 100% 0 0;
-		--secondary: 96% 0 0;
-		--secondary-foreground: 10% 0 0;
-		--muted: 96% 0 0;
-		--muted-foreground: 45% 0 0;
-		--accent: 96% 0 0;
-		--accent-foreground: 10% 0 0;
-		--destructive: 62% 0.22 25;
-		--destructive-foreground: 100% 0 0;
-		--border: 90% 0 0;
-		--input: 90% 0 0;
-		--ring: 47% 0.12 255;
-		--highlight: 75% 0.15 60;
-		--highlight-foreground: 10% 0 0;
-	}
+  :root {
+    --background: 100% 0 0;
+    --foreground: 10% 0 0;
+    --card: 100% 0 0;
+    --card-foreground: 10% 0 0;
+    --popover: 100% 0 0;
+    --popover-foreground: 10% 0 0;
+    --primary: 47% 0.12 255;
+    --primary-foreground: 100% 0 0;
+    --secondary: 96% 0 0;
+    --secondary-foreground: 10% 0 0;
+    --muted: 96% 0 0;
+    --muted-foreground: 45% 0 0;
+    --accent: 96% 0 0;
+    --accent-foreground: 10% 0 0;
+    --destructive: 62% 0.22 25;
+    --destructive-foreground: 100% 0 0;
+    --border: 90% 0 0;
+    --input: 90% 0 0;
+    --ring: 47% 0.12 255;
+    --highlight: 75% 0.15 60;
+    --highlight-foreground: 10% 0 0;
+  }
 
-	.dark {
-		--background: 16% 0 0;
-		--foreground: 98% 0 0;
-		--card: 16% 0 0;
-		--card-foreground: 98% 0 0;
-		--popover: 16% 0 0;
-		--popover-foreground: 98% 0 0;
-		--primary: 58% 0.12 255;
-		--primary-foreground: 16% 0 0;
-		--secondary: 22% 0 0;
-		--secondary-foreground: 98% 0 0;
-		--highlight: 68% 0.18 50;
-		--highlight-foreground: 10% 0 0;
-		--muted: 22% 0 0;
-		--muted-foreground: 65% 0 0;
-		--accent: 22% 0 0;
-		--accent-foreground: 98% 0 0;
-		--destructive: 62% 0.22 25;
-		--destructive-foreground: 98% 0 0;
-		--border: 24% 0 0;
-		--input: 24% 0 0;
-		--ring: 58% 0.12 255;
-	}
+  .dark {
+    --background: 16% 0 0;
+    --foreground: 98% 0 0;
+    --card: 16% 0 0;
+    --card-foreground: 98% 0 0;
+    --popover: 16% 0 0;
+    --popover-foreground: 98% 0 0;
+    --primary: 58% 0.12 255;
+    --primary-foreground: 16% 0 0;
+    --secondary: 22% 0 0;
+    --secondary-foreground: 98% 0 0;
+    --highlight: 68% 0.18 50;
+    --highlight-foreground: 10% 0 0;
+    --muted: 22% 0 0;
+    --muted-foreground: 65% 0 0;
+    --accent: 22% 0 0;
+    --accent-foreground: 98% 0 0;
+    --destructive: 62% 0.22 25;
+    --destructive-foreground: 98% 0 0;
+    --border: 24% 0 0;
+    --input: 24% 0 0;
+    --ring: 58% 0.12 255;
+  }
 
-	/* Rose Pine theme - Official palette */
-	[data-theme="rose-pine"] {
-		/* Base colors */
-		--background: 19.5% 0.022 285; /* Base #191724 */
-		--foreground: 92% 0.048 270; /* Text #e0def4 */
+  /* Rose Pine theme - Official palette */
+  [data-theme="rose-pine"] {
+    /* Base colors */
+    --background: 19.5% 0.022 285; /* Base #191724 */
+    --foreground: 92% 0.048 270; /* Text #e0def4 */
 
-		/* Card colors */
-		--card: 22% 0.02 283; /* Surface #1f1d2e */
-		--card-foreground: 92% 0.048 270; /* Text */
+    /* Card colors */
+    --card: 22% 0.02 283; /* Surface #1f1d2e */
+    --card-foreground: 92% 0.048 270; /* Text */
 
-		/* Popover */
-		--popover: 24% 0.024 285; /* Overlay #26233a */
-		--popover-foreground: 92% 0.048 270; /* Text */
+    /* Popover */
+    --popover: 24% 0.024 285; /* Overlay #26233a */
+    --popover-foreground: 92% 0.048 270; /* Text */
 
-		/* Primary (Iris) */
-		--primary: 78% 0.095 267; /* Iris #c4a7e7 */
-		--primary-foreground: 19.5% 0.022 285; /* Base */
+    /* Primary (Iris) */
+    --primary: 78% 0.095 267; /* Iris #c4a7e7 */
+    --primary-foreground: 19.5% 0.022 285; /* Base */
 
-		/* Secondary */
-		--secondary: 30% 0.022 285; /* Highlight Med #403d52 */
-		--secondary-foreground: 92% 0.048 270; /* Text */
+    /* Secondary */
+    --secondary: 30% 0.022 285; /* Highlight Med #403d52 */
+    --secondary-foreground: 92% 0.048 270; /* Text */
 
-		/* Muted */
-		--muted: 30% 0.022 285; /* Highlight Med */
-		--muted-foreground: 63% 0.03 272; /* Subtle #908caa */
+    /* Muted */
+    --muted: 30% 0.022 285; /* Highlight Med */
+    --muted-foreground: 63% 0.03 272; /* Subtle #908caa */
 
-		/* Accent (Foam) */
-		--accent: 30% 0.022 285; /* Highlight Med */
-		--accent-foreground: 92% 0.048 270; /* Text */
+    /* Accent (Foam) */
+    --accent: 30% 0.022 285; /* Highlight Med */
+    --accent-foreground: 92% 0.048 270; /* Text */
 
-		/* Highlight for changed bytes (Gold) */
-		--highlight: 81% 0.098 52; /* Gold #f6c177 */
-		--highlight-foreground: 19.5% 0.022 285; /* Base - dark text for contrast */
+    /* Highlight for changed bytes (Gold) */
+    --highlight: 81% 0.098 52; /* Gold #f6c177 */
+    --highlight-foreground: 19.5% 0.022 285; /* Base - dark text for contrast */
 
-		/* Destructive (Love) */
-		--destructive: 70% 0.128 343; /* Love #eb6f92 */
-		--destructive-foreground: 92% 0.048 270; /* Text */
+    /* Destructive (Love) */
+    --destructive: 70% 0.128 343; /* Love #eb6f92 */
+    --destructive-foreground: 92% 0.048 270; /* Text */
 
-		/* Borders & inputs */
-		--border: 37% 0.02 285; /* Highlight High #524f67 */
-		--input: 30% 0.022 285; /* Highlight Med */
-		--ring: 78% 0.095 267; /* Iris */
-	}
+    /* Borders & inputs */
+    --border: 37% 0.02 285; /* Highlight High #524f67 */
+    --input: 30% 0.022 285; /* Highlight Med */
+    --ring: 78% 0.095 267; /* Iris */
+  }
 
-	/* Remofer theme - Gray/Black with Red */
-	[data-theme="remofer"] {
-		/* Base colors - Dark gray/black */
-		--background: 13% 0 0; /* #1a1a1a */
-		--foreground: 95% 0 0; /* #f2f2f2 */
+  /* Remofer theme - Gray/Black with Red */
+  [data-theme="remofer"] {
+    /* Base colors - Dark gray/black */
+    --background: 13% 0 0; /* #1a1a1a */
+    --foreground: 95% 0 0; /* #f2f2f2 */
 
-		/* Card colors */
-		--card: 16% 0 0; /* #282828 */
-		--card-foreground: 95% 0 0; /* #f2f2f2 */
+    /* Card colors */
+    --card: 16% 0 0; /* #282828 */
+    --card-foreground: 95% 0 0; /* #f2f2f2 */
 
-		/* Popover */
-		--popover: 18% 0 0; /* #2d2d2d */
-		--popover-foreground: 95% 0 0; /* #f2f2f2 */
+    /* Popover */
+    --popover: 18% 0 0; /* #2d2d2d */
+    --popover-foreground: 95% 0 0; /* #f2f2f2 */
 
-		/* Primary - Red */
-		--primary: 55% 0.18 24; /* #d63f3f */
-		--primary-foreground: 95% 0 0; /* #f2f2f2 */
+    /* Primary - Red */
+    --primary: 55% 0.18 24; /* #d63f3f */
+    --primary-foreground: 95% 0 0; /* #f2f2f2 */
 
-		/* Secondary - Medium Gray */
-		--secondary: 45% 0 0; /* #737373 */
-		--secondary-foreground: 95% 0 0; /* #f2f2f2 */
+    /* Secondary - Medium Gray */
+    --secondary: 45% 0 0; /* #737373 */
+    --secondary-foreground: 95% 0 0; /* #f2f2f2 */
 
-		/* Muted - Dark Gray */
-		--muted: 35% 0 0; /* #595959 */
-		--muted-foreground: 75% 0 0; /* #bfbfbf */
+    /* Muted - Dark Gray */
+    --muted: 35% 0 0; /* #595959 */
+    --muted-foreground: 75% 0 0; /* #bfbfbf */
 
-		/* Accent - Bright Red */
-		--accent: 60% 0.2 25; /* #e74c3c */
-		--accent-foreground: 95% 0 0; /* #f2f2f2 */
+    /* Accent - Bright Red */
+    --accent: 60% 0.2 25; /* #e74c3c */
+    --accent-foreground: 95% 0 0; /* #f2f2f2 */
 
-		/* Highlight for changed bytes - Red */
-		--highlight: 62% 0.22 25; /* #ea4b3b */
-		--highlight-foreground: 95% 0 0; /* #f2f2f2 */
+    /* Highlight for changed bytes - Red */
+    --highlight: 62% 0.22 25; /* #ea4b3b */
+    --highlight-foreground: 95% 0 0; /* #f2f2f2 */
 
-		/* Destructive - Dark Red */
-		--destructive: 48% 0.2 24; /* #b83232 */
-		--destructive-foreground: 95% 0 0; /* #f2f2f2 */
+    /* Destructive - Dark Red */
+    --destructive: 48% 0.2 24; /* #b83232 */
+    --destructive-foreground: 95% 0 0; /* #f2f2f2 */
 
-		/* Borders & inputs - Gray */
-		--border: 25% 0 0; /* #404040 */
-		--input: 22% 0 0; /* #383838 */
-		--ring: 55% 0.18 24; /* #d63f3f */
-	}
+    /* Borders & inputs - Gray */
+    --border: 25% 0 0; /* #404040 */
+    --input: 22% 0 0; /* #383838 */
+    --ring: 55% 0.18 24; /* #d63f3f */
+  }
 
-	/* Furina theme - Based on Furina from Genshin Impact */
-	[data-theme="furina-ousia"] {
-		/* Base - Deep elegant navy blue (her main outfit) */
-		--background: 18% 0.055 255; /* Deep navy blue */
-		--foreground: 95% 0.015 240; /* Soft white with slight blue tint */
+  /* Furina theme - Based on Furina from Genshin Impact */
+  [data-theme="furina-ousia"] {
+    /* Base - Deep elegant navy blue (her main outfit) */
+    --background: 18% 0.055 255; /* Deep navy blue */
+    --foreground: 95% 0.015 240; /* Soft white with slight blue tint */
 
-		/* Card - Slightly elevated royal blue surface */
-		--card: 22% 0.065 252; /* Royal blue surface */
-		--card-foreground: 95% 0.015 240; /* Soft white */
+    /* Card - Slightly elevated royal blue surface */
+    --card: 22% 0.065 252; /* Royal blue surface */
+    --card-foreground: 95% 0.015 240; /* Soft white */
 
-		/* Popover - Richer blue for highest elevation */
-		--popover: 26% 0.07 250; /* Rich royal blue */
-		--popover-foreground: 95% 0.015 240; /* Soft white */
+    /* Popover - Richer blue for highest elevation */
+    --popover: 26% 0.07 250; /* Rich royal blue */
+    --popover-foreground: 95% 0.015 240; /* Soft white */
 
-		/* Primary - Periwinkle blue (her dress and key visual elements) */
-		--primary: 72% 0.11 260; /* Periwinkle/lavender blue */
-		--primary-foreground: 18% 0.055 255; /* Deep navy for contrast */
+    /* Primary - Periwinkle blue (her dress and key visual elements) */
+    --primary: 72% 0.11 260; /* Periwinkle/lavender blue */
+    --primary-foreground: 18% 0.055 255; /* Deep navy for contrast */
 
-		/* Secondary - Soft aqua (her water element and hair highlights) */
-		--secondary: 78% 0.095 235; /* Soft blue-aqua */
-		--secondary-foreground: 18% 0.055 255; /* Deep navy */
+    /* Secondary - Soft aqua (her water element and hair highlights) */
+    --secondary: 78% 0.095 235; /* Soft blue-aqua */
+    --secondary-foreground: 18% 0.055 255; /* Deep navy */
 
-		/* Muted - Medium blue-grey */
-		--muted: 32% 0.055 252; /* Muted blue-grey */
-		--muted-foreground: 75% 0.04 245; /* Light blue-grey text */
+    /* Muted - Medium blue-grey */
+    --muted: 32% 0.055 252; /* Muted blue-grey */
+    --muted-foreground: 75% 0.04 245; /* Light blue-grey text */
 
-		/* Accent - Bright aqua (water effects and active states) */
-		--accent: 58.49% 0.12712 245; /* Bright blue-aqua */
-		--accent-foreground: 18% 0.055 255; /* Deep navy */
+    /* Accent - Bright aqua (water effects and active states) */
+    --accent: 58.49% 0.12712 245; /* Bright blue-aqua */
+    --accent-foreground: 18% 0.055 255; /* Deep navy */
 
-		/* Highlight - Golden (her accessories and important details) */
-		--highlight: 85% 0.13 85; /* Elegant gold */
-		--highlight-foreground: 18% 0.055 255; /* Deep navy */
+    /* Highlight - Golden (her accessories and important details) */
+    --highlight: 85% 0.13 85; /* Elegant gold */
+    --highlight-foreground: 18% 0.055 255; /* Deep navy */
 
-		/* Destructive - Coral pink (elegant contrast) */
-		--destructive: 68% 0.18 15; /* Coral/salmon pink */
-		--destructive-foreground: 95% 0.015 240; /* Soft white */
+    /* Destructive - Coral pink (elegant contrast) */
+    --destructive: 68% 0.18 15; /* Coral/salmon pink */
+    --destructive-foreground: 95% 0.015 240; /* Soft white */
 
-		/* Borders & inputs - Medium elegant blue */
-		--border: 38% 0.065 252; /* Defined blue border */
-		--input: 28% 0.06 254; /* Slightly lighter than card */
-		--ring: 82% 0.12 235; /* Bright blue focus ring */
-	}
+    /* Borders & inputs - Medium elegant blue */
+    --border: 38% 0.065 252; /* Defined blue border */
+    --input: 28% 0.06 254; /* Slightly lighter than card */
+    --ring: 82% 0.12 235; /* Bright blue focus ring */
+  }
 
-	/* Furina Light theme - Light elegant variant */
-	[data-theme="furina-pneuma"] {
-		/* Base - Soft pale blue background */
-		--background: 97% 0.02 240; /* Very light blue-white */
-		--foreground: 22% 0.05 255; /* Deep navy text */
+  /* Furina Light theme - Light elegant variant */
+  [data-theme="furina-pneuma"] {
+    /* Base - Soft pale blue background */
+    --background: 97% 0.02 240; /* Very light blue-white */
+    --foreground: 22% 0.05 255; /* Deep navy text */
 
-		/* Card - Slightly deeper blue-tinted white */
-		--card: 95% 0.025 245; /* Soft blue-white card */
-		--card-foreground: 22% 0.05 255; /* Deep navy text */
+    /* Card - Slightly deeper blue-tinted white */
+    --card: 95% 0.025 245; /* Soft blue-white card */
+    --card-foreground: 22% 0.05 255; /* Deep navy text */
 
-		/* Popover - Clean white with blue tint */
-		--popover: 98% 0.015 240; /* Almost white with blue tint */
-		--popover-foreground: 22% 0.05 255; /* Deep navy text */
+    /* Popover - Clean white with blue tint */
+    --popover: 98% 0.015 240; /* Almost white with blue tint */
+    --popover-foreground: 22% 0.05 255; /* Deep navy text */
 
-		/* Primary - Rich periwinkle (Furina's dress) */
-		--primary: 58% 0.14 260; /* Rich periwinkle */
-		--primary-foreground: 97% 0.02 240; /* Light background */
+    /* Primary - Rich periwinkle (Furina's dress) */
+    --primary: 58% 0.14 260; /* Rich periwinkle */
+    --primary-foreground: 97% 0.02 240; /* Light background */
 
-		/* Secondary - Aqua blue (water element) */
-		--secondary: 65% 0.12 235; /* Blue-aqua */
-		--secondary-foreground: 97% 0.02 240; /* Light background */
+    /* Secondary - Aqua blue (water element) */
+    --secondary: 65% 0.12 235; /* Blue-aqua */
+    --secondary-foreground: 97% 0.02 240; /* Light background */
 
-		/* Muted - Light blue-grey */
-		--muted: 92% 0.02 245; /* Very light blue-grey */
-		--muted-foreground: 48% 0.05 250; /* Medium blue-grey text */
+    /* Muted - Light blue-grey */
+    --muted: 92% 0.02 245; /* Very light blue-grey */
+    --muted-foreground: 48% 0.05 250; /* Medium blue-grey text */
 
-		/* Accent - Bright cyan (water sparkle) */
-		--accent: 88% 0.08 240; /* Light bright blue */
-		--accent-foreground: 22% 0.05 255; /* Deep navy */
+    /* Accent - Bright cyan (water sparkle) */
+    --accent: 88% 0.08 240; /* Light bright blue */
+    --accent-foreground: 22% 0.05 255; /* Deep navy */
 
-		/* Highlight - Warm gold (accessories) */
-		--highlight: 75% 0.12 75; /* Warm golden yellow */
-		--highlight-foreground: 22% 0.05 255; /* Deep navy */
+    /* Highlight - Warm gold (accessories) */
+    --highlight: 75% 0.12 75; /* Warm golden yellow */
+    --highlight-foreground: 22% 0.05 255; /* Deep navy */
 
-		/* Destructive - Vibrant coral */
-		--destructive: 58% 0.18 15; /* Vibrant coral pink */
-		--destructive-foreground: 97% 0.02 240; /* Light background */
+    /* Destructive - Vibrant coral */
+    --destructive: 58% 0.18 15; /* Vibrant coral pink */
+    --destructive-foreground: 97% 0.02 240; /* Light background */
 
-		/* Borders & inputs - Soft blue-grey */
-		--border: 85% 0.04 245; /* Light blue-grey border */
-		--input: 93% 0.025 245; /* Very light input background */
-		--ring: 65% 0.12 235; /* Blue focus ring */
-	}
+    /* Borders & inputs - Soft blue-grey */
+    --border: 85% 0.04 245; /* Light blue-grey border */
+    --input: 93% 0.025 245; /* Very light input background */
+    --ring: 65% 0.12 235; /* Blue focus ring */
+  }
 
-	/* Chaotic UwU theme - High contrast vibrant pastels !CHAOS! >w< */
-	[data-theme="chaotic-uwu"] {
-		/* Base - Bright bubblegum pink background */
-		--background: 92% 0.15 340; /* Vibrant pink background */
-		--foreground: 20% 0.1 280; /* Deep purple text for contrast |w| */
-		/* Card - Electric cyan surface */
-		--card: 88% 0.16 210; /* Bright cyan card */
-		--card-foreground: 20% 0.1 280; /* Deep purple text */
+  /* Chaotic UwU theme - High contrast vibrant pastels !CHAOS! >w< */
+  [data-theme="chaotic-uwu"] {
+    /* Base - Bright bubblegum pink background */
+    --background: 92% 0.15 340; /* Vibrant pink background */
+    --foreground: 20% 0.1 280; /* Deep purple text for contrast |w| */
+    /* Card - Electric cyan surface */
+    --card: 88% 0.16 210; /* Bright cyan card */
+    --card-foreground: 20% 0.1 280; /* Deep purple text */
 
-		/* Popover - Neon lavender */
-		--popover: 85% 0.18 290; /* Bright lavender */
-		--popover-foreground: 20% 0.1 340; /* Deep magenta text */
+    /* Popover - Neon lavender */
+    --popover: 85% 0.18 290; /* Bright lavender */
+    --popover-foreground: 20% 0.1 340; /* Deep magenta text */
 
-		/* Primary - Electric magenta UwU */
-		--primary: 70% 0.25 330; /* Hot magenta */
-		--primary-foreground: 95% 0.05 340; /* Light pink text */
+    /* Primary - Electric magenta UwU */
+    --primary: 70% 0.25 330; /* Hot magenta */
+    --primary-foreground: 95% 0.05 340; /* Light pink text */
 
-		/* Secondary - Neon cyan */
-		--secondary: 75% 0.2 195; /* Bright cyan */
-		--secondary-foreground: 20% 0.1 280; /* Deep purple */
+    /* Secondary - Neon cyan */
+    --secondary: 75% 0.2 195; /* Bright cyan */
+    --secondary-foreground: 20% 0.1 280; /* Deep purple */
 
-		/* Muted - Soft yellow */
-		--muted: 90% 0.12 90; /* Pastel yellow */
-		--muted-foreground: 35% 0.08 280; /* Medium purple text */
+    /* Muted - Soft yellow */
+    --muted: 90% 0.12 90; /* Pastel yellow */
+    --muted-foreground: 35% 0.08 280; /* Medium purple text */
 
-		/* Accent - Electric lime */
-		--accent: 85% 0.18 130; /* Bright lime green */
-		--accent-foreground: 25% 0.12 150; /* Deep green */
+    /* Accent - Electric lime */
+    --accent: 85% 0.18 130; /* Bright lime green */
+    --accent-foreground: 25% 0.12 150; /* Deep green */
 
-		/* Highlight - Sunny orange */
-		--highlight: 78% 0.16 45; /* Vibrant orange */
-		--highlight-foreground: 20% 0.08 280; /* Deep purple */
+    /* Highlight - Sunny orange */
+    --highlight: 78% 0.16 45; /* Vibrant orange */
+    --highlight-foreground: 20% 0.08 280; /* Deep purple */
 
-		/* Destructive - Hot pink */
-		--destructive: 65% 0.28 350; /* Intense hot pink */
-		--destructive-foreground: 95% 0.05 340; /* Light pink */
+    /* Destructive - Hot pink */
+    --destructive: 65% 0.28 350; /* Intense hot pink */
+    --destructive-foreground: 95% 0.05 340; /* Light pink */
 
-		/* Borders & inputs - Purple accent */
-		--border: 70% 0.15 280; /* Medium purple border */
-		--input: 85% 0.14 260; /* Light purple input */
-		--ring: 75% 0.25 320; /* Bright magenta ring */
-	}
+    /* Borders & inputs - Purple accent */
+    --border: 70% 0.15 280; /* Medium purple border */
+    --input: 85% 0.14 260; /* Light purple input */
+    --ring: 75% 0.25 320; /* Bright magenta ring */
+  }
 
-	body {
-		@apply bg-background text-foreground antialiased;
-		scrollbar-color: var(--color-border) var(--color-background);
-	}
+  body {
+    @apply bg-background text-foreground antialiased;
+    scrollbar-color: var(--color-border) var(--color-background);
+  }
 
-	* {
-		@apply border-border;
-		scrollbar-width: thin;
-		scrollbar-color: var(--color-border) var(--color-background);
-	}
+  * {
+    @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) var(--color-background);
+  }
 
-	/* Smooth scrollbars */
-	*::-webkit-scrollbar {
-		width: 12px;
-		height: 12px;
-	}
+  /* Smooth scrollbars */
+  *::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
 
-	*::-webkit-scrollbar-track {
-		@apply bg-background;
-	}
+  *::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
 
-	*::-webkit-scrollbar-thumb {
-		@apply bg-border rounded hover:bg-muted-foreground/30;
-	}
+  *::-webkit-scrollbar-thumb {
+    @apply bg-border rounded hover:bg-muted-foreground/30;
+  }
 
-	/* Better focus rings */
-	button:focus-visible,
-	[tabindex]:focus-visible {
-		@apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
-	}
+  /* Better focus rings */
+  button:focus-visible,
+  [tabindex]:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
 }
 
 .root {
-	isolation: isolate;
+  isolation: isolate;
 }
 
 .titlebar {
-	-webkit-app-region: drag;
+  -webkit-app-region: drag;
 }
 
 .no-drag {
-	-webkit-app-region: no-drag;
+  -webkit-app-region: no-drag;
 }

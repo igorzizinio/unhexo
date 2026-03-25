@@ -8,9 +8,9 @@ import { CheckIcon } from "lucide-preact";
 import { useState } from "preact/hooks";
 import About from "@/lib/components/about";
 import {
-	MenubarItem,
-	MenubarMenu,
-	MenubarSubmenu,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSubmenu,
 } from "@/lib/components/ui/menubar-menu";
 import { NewFileDialog } from "@/lib/components/ui/new-file-dialog";
 import { WindowControls } from "@/lib/components/ui/window-controls";
@@ -19,148 +19,148 @@ import { THEMES, useTheme } from "@/lib/hooks/useTheme";
 import type { ViewMode } from "@/types";
 
 interface TitlebarProps {
-	viewMode: ViewMode;
-	setViewMode: (mode: ViewMode) => void;
-	onSaveRequest: () => void;
+  viewMode: ViewMode;
+  setViewMode: (mode: ViewMode) => void;
+  onSaveRequest: () => void;
 }
 
 const Titlebar = ({ setViewMode, onSaveRequest }: TitlebarProps) => {
-	const appWindow = getCurrentWindow();
-	const { theme, toggleTheme, setTheme } = useTheme();
-	const { openFile: addFile } = useFiles();
+  const appWindow = getCurrentWindow();
+  const { theme, toggleTheme, setTheme } = useTheme();
+  const { openFile: addFile } = useFiles();
 
-	const [newFileOpen, setNewFileOpen] = useState(false);
-	const [aboutOpen, setAboutOpen] = useState(false);
+  const [newFileOpen, setNewFileOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
-	const openFile = async () => {
-		const selected = await open({
-			multiple: true,
-			filters: [
-				{
-					name: "All Files",
-					extensions: [],
-				},
-			],
-		});
+  const openFile = async () => {
+    const selected = await open({
+      multiple: true,
+      filters: [
+        {
+          name: "All Files",
+          extensions: [],
+        },
+      ],
+    });
 
-		if (selected) {
-			try {
-				for (const filePath of selected) {
-					// Open file handle and get file size
-					const info = await invoke<{ size: number }>("open_file_handle", {
-						path: filePath,
-					});
+    if (selected) {
+      try {
+        for (const filePath of selected) {
+          // Open file handle and get file size
+          const info = await invoke<{ size: number }>("open_file_handle", {
+            path: filePath,
+          });
 
-					const fileName = filePath.split(/[\\/]/).pop() || "Unknown";
+          const fileName = filePath.split(/[\\/]/).pop() || "Unknown";
 
-					addFile({
-						filePath,
-						fileName,
-						fileSize: info.size,
-					});
-				}
-			} catch (error) {
-				console.error("Failed to open file:", error);
-			}
-		}
-	};
+          addFile({
+            filePath,
+            fileName,
+            fileSize: info.size,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to open file:", error);
+      }
+    }
+  };
 
-	const createNewFile = async (size: number) => {
-		try {
-			// Create a temporary file on disk
-			const tempPath = await invoke<string>("create_temp_file", { size });
-			const fileName = `untitled-${Date.now()}.bin`;
+  const createNewFile = async (size: number) => {
+    try {
+      // Create a temporary file on disk
+      const tempPath = await invoke<string>("create_temp_file", { size });
+      const fileName = `untitled-${Date.now()}.bin`;
 
-			// Open the temp file as a new tab
-			addFile({
-				fileName,
-				filePath: tempPath,
-				fileSize: size,
-				isTempFile: true,
-			});
-		} catch (error) {
-			console.error("Failed to create new file:", error);
-		}
-	};
+      // Open the temp file as a new tab
+      addFile({
+        fileName,
+        filePath: tempPath,
+        fileSize: size,
+        isTempFile: true,
+      });
+    } catch (error) {
+      console.error("Failed to create new file:", error);
+    }
+  };
 
-	const minimizeApp = async () => {
-		await appWindow.minimize();
-	};
+  const minimizeApp = async () => {
+    await appWindow.minimize();
+  };
 
-	const maximizeApp = async () => {
-		await appWindow.toggleMaximize();
-	};
+  const maximizeApp = async () => {
+    await appWindow.toggleMaximize();
+  };
 
-	const closeApp = async () => {
-		await exit(0);
-	};
+  const closeApp = async () => {
+    await exit(0);
+  };
 
-	return (
-		<div class="flex w-full items-center justify-between titlebar border-b border-border bg-background">
-			<Menubar className="no-drag">
-				<MenubarMenu label="File">
-					<MenubarItem onClick={() => setNewFileOpen(true)}>
-						New File
-					</MenubarItem>
+  return (
+    <div class="flex w-full items-center justify-between titlebar border-b border-border bg-background">
+      <Menubar className="no-drag">
+        <MenubarMenu label="File">
+          <MenubarItem onClick={() => setNewFileOpen(true)}>
+            New File
+          </MenubarItem>
 
-					<MenubarItem onClick={openFile}>Open</MenubarItem>
-					<MenubarItem onClick={onSaveRequest}>Save</MenubarItem>
-					<Separator className="my-1 h-px w-full bg-border" />
-					<MenubarItem onClick={closeApp}>Exit</MenubarItem>
-				</MenubarMenu>
+          <MenubarItem onClick={openFile}>Open</MenubarItem>
+          <MenubarItem onClick={onSaveRequest}>Save</MenubarItem>
+          <Separator className="my-1 h-px w-full bg-border" />
+          <MenubarItem onClick={closeApp}>Exit</MenubarItem>
+        </MenubarMenu>
 
-				<MenubarMenu label="View">
-					<MenubarSubmenu label="Layout">
-						<MenubarItem onClick={() => setViewMode("tabs")}>Tabs</MenubarItem>
-						<MenubarItem onClick={() => setViewMode("mosaic")}>
-							Mosaic
-						</MenubarItem>
-					</MenubarSubmenu>
-					<Separator className="my-1 h-px w-full bg-border" />
-					<MenubarSubmenu label="Theme">
-						{THEMES.map((t) => (
-							<MenubarItem
-								className="flex justify-between"
-								key={t}
-								aria-checked={theme === t}
-								onClick={() => setTheme(t)}
-							>
-								<span>
-									{t
-										.split("-")
-										.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-										.join(" ")}
-								</span>
+        <MenubarMenu label="View">
+          <MenubarSubmenu label="Layout">
+            <MenubarItem onClick={() => setViewMode("tabs")}>Tabs</MenubarItem>
+            <MenubarItem onClick={() => setViewMode("mosaic")}>
+              Mosaic
+            </MenubarItem>
+          </MenubarSubmenu>
+          <Separator className="my-1 h-px w-full bg-border" />
+          <MenubarSubmenu label="Theme">
+            {THEMES.map((t) => (
+              <MenubarItem
+                className="flex justify-between"
+                key={t}
+                aria-checked={theme === t}
+                onClick={() => setTheme(t)}
+              >
+                <span>
+                  {t
+                    .split("-")
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
+                </span>
 
-								<CheckIcon
-									size={14}
-									className={theme === t ? "visible" : "invisible"}
-								/>
-							</MenubarItem>
-						))}
-					</MenubarSubmenu>
-					<Separator className="my-1 h-px w-full bg-border" />
-					<MenubarItem onClick={() => setAboutOpen(true)}>About</MenubarItem>
-				</MenubarMenu>
-			</Menubar>
+                <CheckIcon
+                  size={14}
+                  className={theme === t ? "visible" : "invisible"}
+                />
+              </MenubarItem>
+            ))}
+          </MenubarSubmenu>
+          <Separator className="my-1 h-px w-full bg-border" />
+          <MenubarItem onClick={() => setAboutOpen(true)}>About</MenubarItem>
+        </MenubarMenu>
+      </Menubar>
 
-			<WindowControls
-				theme={theme}
-				onToggleTheme={toggleTheme}
-				onMinimize={minimizeApp}
-				onMaximize={maximizeApp}
-				onClose={closeApp}
-			/>
+      <WindowControls
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onMinimize={minimizeApp}
+        onMaximize={maximizeApp}
+        onClose={closeApp}
+      />
 
-			<NewFileDialog
-				open={newFileOpen}
-				onOpenChange={setNewFileOpen}
-				onCreateFile={createNewFile}
-			/>
+      <NewFileDialog
+        open={newFileOpen}
+        onOpenChange={setNewFileOpen}
+        onCreateFile={createNewFile}
+      />
 
-			<About open={aboutOpen} onOpenChange={setAboutOpen} />
-		</div>
-	);
+      <About open={aboutOpen} onOpenChange={setAboutOpen} />
+    </div>
+  );
 };
 
 export default Titlebar;
