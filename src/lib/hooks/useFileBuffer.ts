@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useCallback, useRef, useState } from "preact/hooks";
+import { useForceUpdate } from "./useForceUpdate";
 
 interface FileBufferCache {
 	[offset: number]: Uint8Array;
@@ -24,7 +25,7 @@ export function useFileBuffer() {
 		loading: new Set(),
 	});
 
-	const [, forceUpdate] = useState(0);
+	const forceUpdate = useForceUpdate();
 
 	const openFile = useCallback(async (filePath: string) => {
 		try {
@@ -48,7 +49,7 @@ export function useFileBuffer() {
 				loading: new Set(),
 			};
 
-			forceUpdate((n) => n + 1);
+			forceUpdate();
 			return info.size;
 		} catch (error) {
 			console.error("Failed to open file handle:", error);
@@ -75,7 +76,7 @@ export function useFileBuffer() {
 			loading: new Set(),
 		};
 
-		forceUpdate((n) => n + 1);
+		forceUpdate();
 	}, []);
 
 	const getChunkOffset = useCallback((byteOffset: number) => {
@@ -105,7 +106,7 @@ export function useFileBuffer() {
 			state.cache[chunkOffset] = buffer;
 			state.loading.delete(chunkOffset);
 
-			forceUpdate((n) => n + 1);
+			forceUpdate();
 			return buffer;
 		} catch (error) {
 			console.error("Failed to load chunk:", error);
@@ -198,7 +199,7 @@ export function useFileBuffer() {
 
 	const clearCache = useCallback(() => {
 		stateRef.current.cache = {};
-		forceUpdate((n) => n + 1);
+		forceUpdate();
 	}, []);
 
 	return {
