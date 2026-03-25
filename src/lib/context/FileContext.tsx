@@ -56,11 +56,10 @@ export function FileProvider({
   );
 
   const openFile = ({
-    filePath,
-    fileName,
-    fileSize,
-    data,
-    isTempFile,
+    filePath = null,
+    fileName = "Untitled",
+    fileSize = 0,
+    isTempFile = false,
   }: Partial<Tab> & { data?: Uint8Array }) => {
     const existing = tabs.find((tab) => tab.filePath === filePath);
 
@@ -69,11 +68,11 @@ export function FileProvider({
     } else {
       const newTab: Tab = {
         id: crypto.randomUUID(),
-        fileName: fileName ?? "Untitled",
-        filePath: filePath ?? null,
-        fileSize: fileSize ?? data?.length ?? 0,
+        fileName,
+        filePath,
+        fileSize,
         changeSet: {},
-        isTempFile: isTempFile ?? false,
+        isTempFile,
         version: 0,
       };
       setTabs((prev) => [...prev, newTab]);
