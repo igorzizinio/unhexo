@@ -1,5 +1,12 @@
-import { readText, writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { useCallback, useState } from "preact/hooks";
+import {
+	copyToClipboard,
+	formatBytesAsAscii,
+	formatBytesAsHex,
+	formatOffsetAsHex,
+	parseHexBytesFromClipboard,
+	readFromClipboard,
+} from "@/lib/utils/clipboard";
 
 interface UseHexViewerSelectionProps {
 	fileSize: number;
@@ -76,9 +83,7 @@ export function useHexViewerSelection({
 
 	const copyOffset = useCallback(async () => {
 		if (selectedByte === null) return;
-		await writeText(
-			`0x${selectedByte.toString(16).padStart(8, "0").toUpperCase()}`,
-		);
+		await copyToClipboard(formatOffsetAsHex(selectedByte));
 	}, [selectedByte]);
 
 	const copySelectionHex = useCallback(async () => {
@@ -86,10 +91,7 @@ export function useHexViewerSelection({
 		const start = Math.min(selectionStart, selectionEnd);
 		const end = Math.max(selectionStart, selectionEnd);
 		const data = await fileBuffer.readBytes(start, end - start + 1);
-		const hex = Array.from(data)
-			.map((b) => b.toString(16).padStart(2, "0").toUpperCase())
-			.join(" ");
-		await writeText(hex);
+		await copyToClipboard(formatBytesAsHex(data));
 	}, [fileBuffer, selectionEnd, selectionStart]);
 
 	const copySelectionAscii = useCallback(async () => {
@@ -97,66 +99,13 @@ export function useHexViewerSelection({
 		const start = Math.min(selectionStart, selectionEnd);
 		const end = Math.max(selectionStart, selectionEnd);
 		const data = await fileBuffer.readBytes(start, end - start + 1);
-		const ascii = Array.from(data)
-			.map((b) => (b >= 32 && b <= 126 ? String.fromCodePoint(b) : "."))
-			.join("");
-		await writeText(ascii);
+		await copyToClipboard(formatBytesAsAscii(data));
 	}, [fileBuffer, selectionEnd, selectionStart]);
-
-	const parseClipboardHexBytes = useCallback((text: string): number[] => {
-		const trimmed = text.trim();
-		if (!trimmed) return [];
-
-		const parsed: number[] = [];
-		const rawTokens = trimmed.split(/[\s,;]+/g).filter(Boolean);
-
-		for (const rawToken of rawTokens) {
-			const token = rawToken.replace(/^0x/i, "").trim();
-			if (!token) continue;
-
-			if (/^[0-9a-fA-F]{2}$/.test(token)) {
-				parsed.push(Number.parseInt(token, 16));
-				continue;
-			}
-
-			if (/^[0-9a-fA-F]+$/.test(token) && token.length % 2 === 0) {
-				for (let i = 0; i < token.length; i += 2) {
-					parsed.push(Number.parseInt(token.slice(i, i + 2), 16));
-				}
-				continue;
-			}
-
-			return [];
-		}
-
-		if (parsed.length > 0) {
-			return parsed;
-		}
-
-		const denseHex = trimmed.replace(/0x/gi, "").replace(/[^0-9a-fA-F]/g, "");
-		if (denseHex.length > 1 && denseHex.length % 2 === 0) {
-			const bytes: number[] = [];
-			for (let i = 0; i < denseHex.length; i += 2) {
-				bytes.push(Number.parseInt(denseHex.slice(i, i + 2), 16));
-			}
-			return bytes;
-		}
-
-		return [];
-	}, []);
 
 	const pasteInSelection = useCallback(async () => {
 		if (selectionStart === null || selectionEnd === null) return;
-
-		let clipboardText = "";
-		try {
-			clipboardText = await readText();
-		} catch (error) {
-			console.error("Failed to read clipboard via Tauri:", error);
-			return;
-		}
-
-		const bytes = parseClipboardHexBytes(clipboardText);
+		const clipboardText = await readFromClipboard();
+		const bytes = parseHexBytesFromClipboard(clipboardText);
 		if (bytes.length === 0) return;
 
 		const start = Math.min(selectionStart, selectionEnd);
@@ -180,28 +129,14 @@ export function useHexViewerSelection({
 			setSelectionEnd(last);
 			setHexNibble("high");
 		}
-	}, [
-		fileSize,
-		parseClipboardHexBytes,
-		selectionEnd,
-		selectionStart,
-		tabId,
-		updateChangeSet,
-	]);
+	}, [fileSize, selectionEnd, selectionStart, tabId, updateChangeSet]);
 
 	const pasteIgnoringSelection = useCallback(async () => {
 		const start = selectionStart ?? selectedByte;
 		if (start === null) return;
 
-		let clipboardText = "";
-		try {
-			clipboardText = await readText();
-		} catch (error) {
-			console.error("Failed to read clipboard via Tauri:", error);
-			return;
-		}
-
-		const bytes = parseClipboardHexBytes(clipboardText);
+		const clipboardText = await readFromClipboard();
+		const bytes = parseHexBytesFromClipboard(clipboardText);
 		if (bytes.length === 0) return;
 
 		const maxBytesByFile = Math.max(0, fileSize - start);
@@ -218,14 +153,7 @@ export function useHexViewerSelection({
 			setSelectionEnd(last);
 			setHexNibble("high");
 		}
-	}, [
-		fileSize,
-		parseClipboardHexBytes,
-		selectedByte,
-		selectionStart,
-		tabId,
-		updateChangeSet,
-	]);
+	}, [fileSize, selectedByte, selectionStart, tabId, updateChangeSet]);
 
 	const handleKeyDown = useCallback(
 		async (e: KeyboardEvent) => {
