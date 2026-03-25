@@ -100,7 +100,7 @@ fn diff_in_range(
     state: State<FileHandles>,
 ) -> Result<Vec<u64>, String> {
     let mut handles = state.handles.lock().unwrap();
-    
+
     // Seek left file
     if let Some(file) = handles.get_mut(&path_left) {
         file.seek(SeekFrom::Start(offset))
@@ -108,7 +108,7 @@ fn diff_in_range(
     } else {
         return Err("Left file handle not found".to_string());
     }
-    
+
     // Seek right file
     if let Some(file) = handles.get_mut(&path_right) {
         file.seek(SeekFrom::Start(offset))
@@ -148,7 +148,7 @@ fn diff_in_range(
         };
 
         let min_bytes = bytes_read_left.min(bytes_read_right);
-        
+
         for i in 0..min_bytes {
             if buffer_left[i] != buffer_right[i] {
                 diffs.push(pos + i as u64);
@@ -164,7 +164,7 @@ fn diff_in_range(
         }
 
         pos += to_read as u64;
-        
+
         if bytes_read_left == 0 && bytes_read_right == 0 {
             break;
         }
@@ -182,7 +182,7 @@ fn find_next_diff(
     state: State<FileHandles>,
 ) -> Result<Option<u64>, String> {
     let mut handles = state.handles.lock().unwrap();
-    
+
     // Seek both files to the starting offset
     if let Some(file) = handles.get_mut(&path_left) {
         file.seek(SeekFrom::Start(from_offset))
@@ -190,7 +190,7 @@ fn find_next_diff(
     } else {
         return Err("Left file handle not found".to_string());
     }
-    
+
     if let Some(file) = handles.get_mut(&path_right) {
         file.seek(SeekFrom::Start(from_offset))
             .map_err(|e| e.to_string())?;
@@ -266,14 +266,14 @@ fn find_prev_diff(
     }
 
     let mut handles = state.handles.lock().unwrap();
-    
+
     let buffer_size = 4096;
     let mut buffer_left = vec![0u8; buffer_size];
     let mut buffer_right = vec![0u8; buffer_size];
 
     // Search backwards in chunks
     let mut search_end = from_offset;
-    
+
     while search_end > 0 {
         let chunk_start = if search_end > buffer_size as u64 {
             search_end - buffer_size as u64
@@ -289,7 +289,7 @@ fn find_prev_diff(
         } else {
             return Err("Left file handle not found".to_string());
         }
-        
+
         let bytes_read_left = {
             let file_left = handles
                 .get_mut(&path_left)
@@ -306,7 +306,7 @@ fn find_prev_diff(
         } else {
             return Err("Right file handle not found".to_string());
         }
-        
+
         let bytes_read_right = {
             let file_right = handles
                 .get_mut(&path_right)
@@ -350,6 +350,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .manage(FileHandles {
             handles: Mutex::new(HashMap::new()),
         })
