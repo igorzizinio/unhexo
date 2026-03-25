@@ -246,7 +246,7 @@ export function BufferedHexViewer({
 	const hasMultiSelection = hasSelection && selectionStart !== selectionEnd;
 
 	return (
-		// biome-ignore lint: precisamos manter foco por teclado
+		// biome-ignore lint/a11y/noStaticElementInteractions: we need to have keyboard events on the container for navigation and editing
 		<section
 			className={`h-full flex flex-col border-2 rounded ${
 				isActive ? "border-primary ring-1 ring-primary/40" : "border-border"
