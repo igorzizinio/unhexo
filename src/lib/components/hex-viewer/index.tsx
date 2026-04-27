@@ -39,7 +39,7 @@ export function BufferedHexViewer({
   version = 0,
   className,
 }: Readonly<BufferedHexViewerProps>) {
-  const { updateChangeSet } = useFiles();
+  const { updateChangeSet, undoChangeSet } = useFiles();
   const fileBuffer = useFileBuffer();
 
   const rootRef = useRef<HTMLElement>(null);
@@ -100,6 +100,7 @@ export function BufferedHexViewer({
     fileBuffer,
     tabId,
     updateChangeSet,
+    undoChangeSet,
     containerHeight,
     bytesPerRow: BYTES_PER_ROW,
     rowHeight: ROW_HEIGHT,

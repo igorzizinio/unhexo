@@ -17,7 +17,13 @@ interface UseHexViewerSelectionProps {
     readBytes: (offset: number, length: number) => Promise<Uint8Array>;
   };
   tabId: string;
-  updateChangeSet: (tabId: string, offset: number, value: number) => void;
+  updateChangeSet: (
+    tabId: string,
+    offset: number,
+    value: number,
+    previousValue: number,
+  ) => void;
+  undoChangeSet: (tabId: string) => number | null;
   containerHeight: number;
   bytesPerRow: number;
   rowHeight: number;
@@ -32,6 +38,7 @@ export function useHexViewerSelection({
   fileBuffer,
   tabId,
   updateChangeSet,
+  undoChangeSet,
   containerHeight,
   bytesPerRow,
   rowHeight,
@@ -119,7 +126,9 @@ export function useHexViewerSelection({
     );
 
     for (let i = 0; i < bytesToWrite; i++) {
-      updateChangeSet(tabId, start + i, bytes[i]);
+      const offset = start + i;
+      const previousValue = getByteValue(offset);
+      updateChangeSet(tabId, offset, bytes[i], previousValue);
     }
 
     if (bytesToWrite > 0) {
@@ -129,7 +138,14 @@ export function useHexViewerSelection({
       setSelectionEnd(last);
       setHexNibble("high");
     }
-  }, [fileSize, selectionEnd, selectionStart, tabId, updateChangeSet]);
+  }, [
+    fileSize,
+    getByteValue,
+    selectionEnd,
+    selectionStart,
+    tabId,
+    updateChangeSet,
+  ]);
 
   const pasteIgnoringSelection = useCallback(async () => {
     const start = selectionStart ?? selectedByte;
@@ -143,7 +159,9 @@ export function useHexViewerSelection({
     const bytesToWrite = Math.min(bytes.length, maxBytesByFile);
 
     for (let i = 0; i < bytesToWrite; i++) {
-      updateChangeSet(tabId, start + i, bytes[i]);
+      const offset = start + i;
+      const previousValue = getByteValue(offset);
+      updateChangeSet(tabId, offset, bytes[i], previousValue);
     }
 
     if (bytesToWrite > 0) {
@@ -153,7 +171,14 @@ export function useHexViewerSelection({
       setSelectionEnd(last);
       setHexNibble("high");
     }
-  }, [fileSize, selectedByte, selectionStart, tabId, updateChangeSet]);
+  }, [
+    fileSize,
+    getByteValue,
+    selectedByte,
+    selectionStart,
+    tabId,
+    updateChangeSet,
+  ]);
 
   const handleKeyDown = useCallback(
     async (e: KeyboardEvent) => {
@@ -163,6 +188,19 @@ export function useHexViewerSelection({
             e.preventDefault();
             e.shiftKey ? await copySelectionAscii() : await copySelectionHex();
             return;
+          case "z": {
+            e.preventDefault();
+            const undoneOffset = undoChangeSet(tabId);
+
+            if (undoneOffset !== null) {
+              setSelectedByte(undoneOffset);
+              setSelectionStart(undoneOffset);
+              setSelectionEnd(undoneOffset);
+              setHexNibble("high");
+            }
+
+            return;
+          }
           case "a":
             e.preventDefault();
             setSelectionStart(0);
@@ -219,7 +257,7 @@ export function useHexViewerSelection({
           }
         }
 
-        updateChangeSet(tabId, selectedByte, newByte);
+        updateChangeSet(tabId, selectedByte, newByte, oldByte);
         return;
       }
 
@@ -286,6 +324,7 @@ export function useHexViewerSelection({
       onToggleGoTo,
       pasteIgnoringSelection,
       pasteInSelection,
+      undoChangeSet,
       resetSelection,
       rowHeight,
       selectedByte,

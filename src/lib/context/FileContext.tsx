@@ -7,12 +7,20 @@ import { useFileBuffer } from "../hooks/useFileBuffer";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { applyChangeSetChunked } from "../utils/changeSet";
 
+interface ChangeOperation {
+  offset: number;
+  previousValue: number;
+  nextValue: number;
+}
+
 export interface Tab {
   id: string;
   fileName: string;
   filePath: string | null;
   fileSize: number;
   changeSet: Record<number, number>; // byte offset to new byte value
+  changeOrigins: Record<number, number>;
+  changeHistory: ChangeOperation[];
   isTempFile?: boolean; // Flag to indicate if this is a temporary file
   version?: number; // Incremented on save to trigger buffer reload
 }
@@ -31,7 +39,13 @@ interface FileContextType {
   closeTab: (id: string) => Promise<void>;
   setActiveTab: (id: string) => void;
   saveTab: (id: string) => Promise<void>;
-  updateChangeSet: (id: string, offset: number, value: number) => void;
+  updateChangeSet: (
+    id: string,
+    offset: number,
+    value: number,
+    previousValue: number,
+  ) => void;
+  undoChangeSet: (id: string) => number | null;
   clearChangeSet: (id: string) => void;
 }
 
@@ -72,6 +86,8 @@ export function FileProvider({
         filePath,
         fileSize,
         changeSet: {},
+        changeOrigins: {},
+        changeHistory: [],
         isTempFile,
         version: 0,
       };
@@ -104,20 +120,97 @@ export function FileProvider({
     }
   };
 
-  const updateChangeSet = (id: string, offset: number, value: number) => {
+  const updateChangeSet = (
+    id: string,
+    offset: number,
+    value: number,
+    previousValue: number,
+  ) => {
     setTabs((prev) =>
       prev.map((tab) => {
         if (tab.id !== id) return tab;
-        return { ...tab, changeSet: { ...tab.changeSet, [offset]: value } };
+        const changeHistory = tab.changeHistory ?? [];
+        const changeOrigins = tab.changeOrigins ?? {};
+        const originalValue = changeOrigins[offset] ?? previousValue;
+
+        if (previousValue === value || tab.changeSet[offset] === value) {
+          return tab;
+        }
+
+        const nextOrigins = {
+          ...changeOrigins,
+          [offset]: originalValue,
+        };
+        const nextChangeSet = { ...tab.changeSet };
+
+        if (value === originalValue) {
+          delete nextChangeSet[offset];
+        } else {
+          nextChangeSet[offset] = value;
+        }
+
+        return {
+          ...tab,
+          changeSet: nextChangeSet,
+          changeOrigins: nextOrigins,
+          changeHistory: [
+            ...changeHistory,
+            { offset, previousValue, nextValue: value },
+          ],
+        };
       }),
     );
+  };
+
+  const undoChangeSet = (id: string) => {
+    let undoneOffset: number | null = null;
+
+    setTabs((prev) =>
+      prev.map((tab) => {
+        const changeHistory = tab.changeHistory ?? [];
+        const changeOrigins = tab.changeOrigins ?? {};
+
+        if (tab.id !== id || changeHistory.length === 0) return tab;
+
+        const lastOperation = changeHistory[changeHistory.length - 1];
+        undoneOffset = lastOperation.offset;
+        const originalValue =
+          changeOrigins[lastOperation.offset] ?? lastOperation.previousValue;
+
+        const nextHistory = changeHistory.slice(0, -1);
+        const nextChangeSet = { ...tab.changeSet };
+        const nextOrigins = { ...changeOrigins };
+
+        if (lastOperation.previousValue === originalValue) {
+          delete nextChangeSet[lastOperation.offset];
+          delete nextOrigins[lastOperation.offset];
+        } else {
+          nextChangeSet[lastOperation.offset] = lastOperation.previousValue;
+        }
+
+        return {
+          ...tab,
+          changeSet: nextChangeSet,
+          changeOrigins: nextOrigins,
+          changeHistory: nextHistory,
+        };
+      }),
+    );
+
+    return undoneOffset;
   };
 
   const clearChangeSet = (id: string) => {
     setTabs((prev) =>
       prev.map((tab) => {
         if (tab.id !== id) return tab;
-        return { ...tab, changeSet: {}, version: (tab.version ?? 0) + 1 };
+        return {
+          ...tab,
+          changeSet: {},
+          changeOrigins: {},
+          changeHistory: [],
+          version: (tab.version ?? 0) + 1,
+        };
       }),
     );
   };
@@ -190,6 +283,8 @@ export function FileProvider({
                   fileName: savePath?.split(/[\\/]/).pop() || t.fileName,
                   isTempFile: false,
                   changeSet: {},
+                  changeOrigins: {},
+                  changeHistory: [],
                 }
               : t,
           ),
@@ -214,6 +309,7 @@ export function FileProvider({
       setActiveTab: setActiveTabId,
       saveTab,
       updateChangeSet,
+      undoChangeSet,
       clearChangeSet,
     }),
     [tabs, activeTabId, activeTab],

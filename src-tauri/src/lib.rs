@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::sync::Mutex;
+use tauri::webview::PageLoadEvent;
 use tauri::State;
 
 struct FileHandles {
@@ -364,6 +365,11 @@ pub fn run() {
             find_next_diff,
             find_prev_diff,
         ])
+        .on_page_load(|webview, payload| {
+            if webview.label() == "main" && matches!(payload.event(), PageLoadEvent::Finished) {
+                let _ = webview.window().show();
+            }
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
